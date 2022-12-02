@@ -17,11 +17,14 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    if (token == null) {
-      navigate("/login", { replace: true });
+    const path = location.pathname;
+
+    if (token === null) {
+      if (path !== "/login") {
+        navigate("/login", { replace: true });
+      }
     } else {
-      const path = location.pathname;
-      if (path == "/" || path == "/login" || path == "/app") {
+      if (path === "/" || path === "/login" || path === "/app") {
         navigate("/app/dimore", { replace: true });
       }
     }
