@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 
 import LoginScreen from "./screens/LoginScreen";
-import DashboardScreen from "./screens/Dashboard";
+import DashboardScreen from "./screens/DashBoard/Dashboard";
 import DimoreScreen from "./screens/DimoreScreen";
 import DimoraDetailsScreen from "./screens/DimoraDetailsScreen";
 import NotFoundScreen from "./screens/NotFoundScreen";
@@ -12,7 +12,7 @@ import CreditsScreen from "./screens/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>("test");
   const navigate = useNavigate();
   const location = useLocation();
 

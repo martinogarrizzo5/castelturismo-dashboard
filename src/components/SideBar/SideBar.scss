@@ -1,0 +1,10 @@
+.SideBar {
+    padding: 4.8rem 2.4rem;
+    box-shadow: 0.1rem 0 0.5rem var(--shadowColor);
+
+    &__logo {
+        border-radius: 0.5rem;
+        width: 4.4rem;
+        height: 4.4rem;
+    }
+}
