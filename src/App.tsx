@@ -19,15 +19,12 @@ function App() {
   useEffect(() => {
     const path = location.pathname;
 
-    if (token === null) {
-      if (path !== "/login") {
-        navigate("/login", { replace: true });
-      }
-    } else {
-      if (path === "/" || path === "/login" || path === "/app") {
-        navigate("/app/dimore", { replace: true });
-      }
-    }
+    // auth guards
+    if (token === null && path === "/login") return;
+    if (token === null) return navigate("/login", { replace: true });
+
+    if (path === "/" || path === "/login" || path === "/app")
+      return navigate("/app/dimore", { replace: true });
   }, [token, location]);
 
   return (
