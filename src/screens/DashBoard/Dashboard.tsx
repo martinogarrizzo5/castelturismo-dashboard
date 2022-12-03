@@ -6,9 +6,7 @@ function DashboardScreen() {
   return (
     <div className="Dashboard">
       <SideBar />
-      <main className="Dashboard__content">
-        <Outlet />
-      </main>
+      <Outlet />
     </div>
   );
 }

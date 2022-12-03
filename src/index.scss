@@ -1,19 +1,7 @@
-:root {
-  --pageColor: #F2F4F7FF;
-  --head1Color: #131514;
-  --head2Color: #20381EFF;
-  --fontBodyColor: #131514FF;
-  --grayColor: #D1D6D1FF;
-  --shadowColor: #52525240;
-  --iconColor: #20381EFF;
-  --hoverIconButtonColor: #E8FFE9FF;
-
-  --primaryColorLight: #C7DFC5FF;
-  --primaryColor: #38852EFF;
-  --primaryColorDark: #3B6835FF;
-  --primaryColorDarker: #2E4F2BFF;
-  --primaryColorDarkest: #20381EFF;
-}
+@import "scss/theme";
+@import "scss/scrollbar";
+@import "scss/tipography";
+@import "scss/components";
 
 *,
 *::after,
@@ -39,27 +27,22 @@ a {
   display: inline-block;
 }
 
+button {
+  display: inline-block;
+  outline: none;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
 input {
+  display: inline-block;
   background-color: transparent;
   outline: none;
+  border: none;
 }
 
-/* width */
-::-webkit-scrollbar {
-  width: 9px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+::selection {
+  background-color: var(--primaryColorLight);
+  color: var(--primaryColorDarkest);
 }

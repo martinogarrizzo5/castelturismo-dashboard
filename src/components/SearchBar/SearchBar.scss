@@ -1,0 +1,55 @@
+.SearchBar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-right: 4rem;
+
+    &__input {
+        position: relative;
+        width: 100%;
+
+        &__field {
+            width: 100%;
+            border-radius: 1.2rem 0 0 1.2rem;
+            border-right: transparent;
+            padding-right: 6rem;
+        }
+
+        &__cancelButton {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.4rem;
+            border-radius: 0.8rem;
+
+            &__icon {
+                width: 2.4rem;
+                color: var(--iconForegroundColor);
+            }
+
+            &:hover {
+                background-color: var(--hoverIconButtonColor);
+            }
+
+            &:active {
+                background-color: var(--focusIconButtonColor);
+            }
+        }
+    }
+
+    &__button {
+        display: flex;
+        align-items: center;
+        border-radius: 0 1.2rem 1.2rem 0;
+
+        &__icon {
+            width: 2rem;
+            margin-right: 0.8rem;
+        }
+
+        &__text {}
+    }
+}

@@ -1,10 +1,28 @@
 .SideBar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 4.8rem 2.4rem;
-    box-shadow: 0.1rem 0 0.5rem var(--shadowColor);
+    box-shadow: 0 0 3px 1px var(--grayColor);
+    background-color: var(--sideBarColor);
+
 
     &__logo {
         border-radius: 0.5rem;
-        width: 4.4rem;
-        height: 4.4rem;
+        width: 4.8rem;
+        height: 4.8rem;
+        margin-bottom: 4.0rem;
+    }
+
+    &__links {
+        display: flex;
+        flex-direction: column;
+        gap: 2.2rem;
+        height: 100%;
+
+        &__logout {
+            margin-top: auto;
+
+        }
     }
 }

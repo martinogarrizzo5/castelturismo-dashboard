@@ -2,7 +2,5 @@
     display: flex;
     min-height: 100vh;
 
-    &__content {
-        padding: 4.8rem;
-    }
+    background-color: var(--pageColor);
 }

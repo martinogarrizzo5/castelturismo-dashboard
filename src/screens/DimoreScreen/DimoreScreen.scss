@@ -1,0 +1,36 @@
+.Dimore {
+    &__title {
+        margin-bottom: 1.2rem;
+    }
+
+    &__zones {
+        display: flex;
+        gap: 2.4rem;
+    }
+
+    &__zone {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4rem;
+
+        &__icon {
+            width: 2rem;
+            margin-right: 0.4rem;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+    }
+
+    &__add-button {
+        display: flex;
+        align-items: center;
+
+        &__icon {
+            width: 2rem;
+            margin-right: 0.8rem;
+        }
+    }
+}
