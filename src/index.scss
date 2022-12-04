@@ -19,6 +19,12 @@ html {
 
 body {
   font-size: 1.6rem;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100%;
 }
 
 a {

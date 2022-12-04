@@ -12,7 +12,7 @@ import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>("some");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,6 +23,9 @@ function App() {
     if (token === null && path === "/login") return;
     if (token === null) return navigate("/login", { replace: true });
 
+    // TODO: send token to server to check if it's valid
+
+    // redirect to dashboard if user is logged in
     if (path === "/" || path === "/login" || path === "/app")
       return navigate("/app/dimore", { replace: true });
   }, [token, location]);

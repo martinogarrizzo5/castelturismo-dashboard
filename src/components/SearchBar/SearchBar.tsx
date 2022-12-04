@@ -6,6 +6,7 @@ import "./SearchBar.scss";
 interface ISearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  onSearch: () => void;
 }
 
 function SearchBar(props: ISearchBarProps) {
@@ -28,13 +29,21 @@ function SearchBar(props: ISearchBarProps) {
           value={props.value}
           onChange={updateInputValue}
         />
-        <button className="SearchBar__input__cancelButton" onClick={clearInput}>
+        <button
+          className="SearchBar__input__cancelButton"
+          type="button"
+          onClick={clearInput}
+        >
           {props.value && (
             <CloseSvg className="SearchBar__input__cancelButton__icon" />
           )}
         </button>
       </div>
-      <button className="btn SearchBar__button">
+      <button
+        className="btn SearchBar__button"
+        type="button"
+        onClick={props.onSearch}
+      >
         <SearchSvg className="SearchBar__button__icon" />
         <span className="SearchBar__button__text">Cerca</span>
       </button>
