@@ -11,7 +11,7 @@ import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>("some");
+  const [token, setToken] = useState<string | null>("someToken");
   const navigate = useNavigate();
   const location = useLocation();
 

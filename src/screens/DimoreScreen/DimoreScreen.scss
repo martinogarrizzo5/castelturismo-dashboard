@@ -5,13 +5,16 @@
 
     &__zones {
         display: flex;
+        flex-wrap: wrap;
         gap: 2.4rem;
+        margin-bottom: 4rem;
     }
 
     &__zone {
         display: flex;
         align-items: center;
-        margin-bottom: 4rem;
+        justify-content: center;
+        min-width: 20rem;
 
         &__icon {
             width: 2rem;

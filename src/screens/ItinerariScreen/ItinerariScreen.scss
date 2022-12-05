@@ -1,3 +1,32 @@
 .Itinerari {
-    
+    height: 100%;
+
+    &__titleSection {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.6rem;
+    }
+
+    &__addButton {
+        display: flex;
+        align-items: center;
+
+        &__icon {
+            width: 2rem;
+            margin-right: 0.8rem;
+        }
+    }
+
+    &__introPercorsi {
+        display: grid;
+
+        grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr));
+        gap: 4.4rem;
+        margin-top: 4.8rem;
+    }
+
+    &__spinner {
+        margin-bottom: 10rem;
+    }
 }

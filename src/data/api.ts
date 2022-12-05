@@ -20,6 +20,13 @@ class Api {
     });
     return res.data as IZona;
   }
+
+  static async fetchIntroPercorsi(params: IFetchIntroPercorsi) {
+    const res = await axios.get(`/percorsi`, {
+      signal: params.signal,
+    });
+    return res.data as IIntroPercorso[];
+  }
 }
 
 export default Api;

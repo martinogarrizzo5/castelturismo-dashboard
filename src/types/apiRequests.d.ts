@@ -11,3 +11,5 @@ interface IFetchDimoraById extends IRequest {
 interface IFetchDimoreByZona extends IRequest {
   zonaId: number;
 }
+
+interface IFetchIntroPercorsi extends IRequest {}

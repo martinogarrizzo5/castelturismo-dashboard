@@ -33,7 +33,7 @@ interface IFiltro {
 interface IIntroPercorso {
   id: number;
   descrizione: string;
-  imagePath: string;
+  path: string;
 }
 
 interface IPercorso {

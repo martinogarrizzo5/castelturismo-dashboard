@@ -16,7 +16,7 @@ function DimoreScreen() {
 
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [dimore, setDimore] = useState<Dimora[] | null>(null);
-  const [isLoadingContent, setIsLoadingContent] = useState<boolean>(true);
+  const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
 
   const zones = [
     { name: "Tra le Mura", id: 1 },

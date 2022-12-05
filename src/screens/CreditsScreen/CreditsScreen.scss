@@ -1,3 +1,26 @@
 .Credits {
-    
+
+    &__titleSection {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.8rem;
+
+        &__title {}
+
+        &__languageDropdown {}
+    }
+
+    &__textarea {
+        flex: 1;
+        margin-bottom: 1rem;
+    }
+
+    &__credits {
+        color: var(--primaryColorDarker);
+    }
+
+    &__save {
+        align-self: flex-end;
+    }
 }
