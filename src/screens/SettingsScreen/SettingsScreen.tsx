@@ -1,4 +1,5 @@
 import React from "react";
+import "./SettingsScreen.scss";
 
 function SettingsScreen() {
   return (

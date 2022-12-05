@@ -1,4 +1,5 @@
 import React from "react";
+import "./ItinerariScreen.scss";
 
 function ItinerariScreen() {
   return (

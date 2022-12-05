@@ -5,7 +5,6 @@ import LoginScreen from "./screens/LoginScreen/LoginScreen";
 import DashboardScreen from "./screens/DashBoard/Dashboard";
 import DimoreScreen from "./screens/DimoreScreen/DimoreScreen";
 import DimoraDetailsScreen from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
-import NotFoundScreen from "./screens/NotFoundScreen/NotFoundScreen";
 import ItinerariScreen from "./screens/ItinerariScreen/ItinerariScreen";
 import ItinerarioDetailsScreen from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
@@ -41,7 +40,6 @@ function App() {
         <Route path="settings" element={<SettingsScreen />} />
       </Route>
       <Route path="/login" element={<LoginScreen />} />
-      <Route path="*" element={<NotFoundScreen />} />
     </Routes>
   );
 }

@@ -17,10 +17,16 @@ function DimoraCard(props: IDimoraCardProps) {
     return name.substring(0, shortNameSize) + "...";
   };
 
+  let imageToShow = props.dimora.coverPath;
+  // TODO: remove this when there will be better images for hotels and bars
+  if (props.dimora.tipologia === "Bar") {
+    imageToShow = props.dimora.foto[1].path;
+  }
+
   return (
     <figure className="DimoraCard">
       <img
-        src={props.dimora.coverPath}
+        src={imageToShow}
         alt={props.dimora.nome}
         className="DimoraCard__image"
         loading="lazy"
