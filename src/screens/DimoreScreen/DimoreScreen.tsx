@@ -8,6 +8,7 @@ import Api from "../../data/api";
 import DimoraCard from "../../components/DimoraCard/DimoraCard";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
+import classNames from "classnames";
 
 function DimoreScreen() {
   const navigate = useNavigate();
@@ -19,8 +20,8 @@ function DimoreScreen() {
   const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
 
   const zones = [
-    { name: "Tra le Mura", id: 1 },
-    { name: "Corso XXIX Aprile", id: 2 },
+    { name: "Corso XXIX Aprile", id: 1 },
+    { name: "Tra le Mura", id: 2 },
     { name: "Piazza Giorgione", id: 3 },
     { name: "Borgo Treviso", id: 4 },
   ];
@@ -31,7 +32,7 @@ function DimoreScreen() {
     const zonaId = params.get("zona") || "";
 
     if (zonaId) {
-      Api.fetchDimoreByZona({ zonaId: +zonaId })
+      Api.fetchDimoreByZona({ zonaId: +zonaId, signal: abortController.signal })
         .then((zona) => handleDimoreData(zona.dimore))
         .catch((err) => handleRequestError(err));
     } else {
@@ -64,24 +65,53 @@ function DimoreScreen() {
   };
 
   const onSearch = () => {
-    setIsLoadingContent(true);
     // TODO: implement search
   };
 
-  const onZonaFiltering = (id: number) => {
+  const filterByZona = (id: number) => {
+    if (params.get("zona") === id.toString()) return;
     setSearchParams({ zona: id.toString() });
   };
+
+  const removeZonaFilter = () => {
+    if (!params.get("zona")) return;
+    setSearchParams({});
+  };
+
+  const onCardClick = (dimora: Dimora) => {
+    navigate(`/app/dimore/${dimora.id}`);
+  };
+
+  const onAddButtonClick = () => {
+    navigate("/app/dimore/new");
+  };
+
+  const zonaId = params.get("zona");
 
   return (
     <main className="Dimore page">
       <h2 className="Dimore__title title">Zone</h2>
       <div className="Dimore__zones">
+        <button
+          className={classNames(
+            "btn Dimore__zone",
+            !zonaId && "Dimore__zone--active"
+          )}
+          type="button"
+          onClick={removeZonaFilter}
+        >
+          <PinSvg className="Dimore__zone__icon" />
+          <span className="Dimore__zone__name">Tutte</span>
+        </button>
         {zones.map((zone) => (
           <button
-            className="btn Dimore__zone"
+            className={classNames(
+              "btn Dimore__zone",
+              zonaId != null && zone.id === +zonaId && "Dimore__zone--active"
+            )}
             key={`zone-${zone.id}`}
             type="button"
-            onClick={() => onZonaFiltering(zone.id)}
+            onClick={() => filterByZona(zone.id)}
           >
             <PinSvg className="Dimore__zone__icon" />
             <span className="Dimore__zone__name">{zone.name}</span>
@@ -95,7 +125,11 @@ function DimoreScreen() {
           onChange={onSearchedValueChanged}
           onSearch={onSearch}
         />
-        <button className="btn Dimore__add-button" type="button">
+        <button
+          className="btn Dimore__add-button"
+          type="button"
+          onClick={onAddButtonClick}
+        >
           <AddSvg className="Dimore__add-button__icon" />
           <span>Aggiungi</span>
         </button>
@@ -103,7 +137,11 @@ function DimoreScreen() {
       {dimore !== null && !isLoadingContent ? (
         <div className="Dimore__dimore">
           {dimore.map((dimora) => (
-            <DimoraCard dimora={dimora} key={`dimora-${dimora.id}`} />
+            <DimoraCard
+              dimora={dimora}
+              key={`dimora-${dimora.id}`}
+              onClick={() => onCardClick(dimora)}
+            />
           ))}
         </div>
       ) : (

@@ -21,12 +21,25 @@
         bottom: 0;
         background-color: var(--primaryColor);
         color: white;
+        transition: all 150ms;
 
         border-radius: 0 0 1.2rem 1.2rem;
 
         &__text {
             font-size: 18px;
             font-weight: 500;
+        }
+    }
+
+    &:hover {
+        .DimoraCard__caption {
+            background-color: var(--primaryColorDark);
+        }
+    }
+
+    &:active {
+        .DimoraCard__caption {
+            background-color: var(--primaryColorDarker);
         }
     }
 }

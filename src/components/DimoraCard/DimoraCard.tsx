@@ -4,6 +4,7 @@ import "./DimoraCard.scss";
 
 interface IDimoraCardProps {
   dimora: Dimora;
+  onClick: () => void;
 }
 
 function DimoraCard(props: IDimoraCardProps) {
@@ -24,7 +25,7 @@ function DimoraCard(props: IDimoraCardProps) {
   }
 
   return (
-    <figure className="DimoraCard">
+    <figure className="DimoraCard" onClick={props.onClick}>
       <img
         src={imageToShow}
         alt={props.dimora.nome}

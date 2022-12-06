@@ -29,6 +29,12 @@
     &:active {
         background-color: var(--primaryColorDarkest);
     }
+
+    &__icon {
+        margin-right: 0.8rem;
+        width: 2rem;
+        height: 2rem;
+    }
 }
 
 .input {

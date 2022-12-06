@@ -13,3 +13,5 @@ interface IFetchDimoreByZona extends IRequest {
 }
 
 interface IFetchIntroPercorsi extends IRequest {}
+
+interface IFetchCredits extends IRequest {}

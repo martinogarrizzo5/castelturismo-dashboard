@@ -8,6 +8,7 @@
     border-radius: 1.2rem;
     padding: 3rem;
     cursor: pointer;
+    transition: all 150ms;
 
     &__image {
         width: 20rem;
@@ -16,5 +17,13 @@
 
     &__caption {
         color: white;
+    }
+
+    &:hover {
+        background-color: var(--primaryColorDark);
+    }
+
+    &:active {
+        background-color: var(--primaryColorDarker);
     }
 }

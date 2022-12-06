@@ -4,14 +4,16 @@ import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import LoginScreen from "./screens/LoginScreen/LoginScreen";
 import DashboardScreen from "./screens/DashBoard/Dashboard";
 import DimoreScreen from "./screens/DimoreScreen/DimoreScreen";
-import DimoraDetailsScreen from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
+import DimoraDetailsScreen, {
+  DimoraDetailsAction,
+} from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
 import ItinerariScreen from "./screens/ItinerariScreen/ItinerariScreen";
 import ItinerarioDetailsScreen from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>("someToken");
+  const [token, setToken] = useState<string | null>("some-token");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,7 +35,14 @@ function App() {
     <Routes>
       <Route path="/app/*" element={<DashboardScreen />}>
         <Route path="dimore" element={<DimoreScreen />} />
-        <Route path="dimore/:id" element={<DimoraDetailsScreen />} />
+        <Route
+          path="dimore/:id"
+          element={<DimoraDetailsScreen action={DimoraDetailsAction.Edit} />}
+        />
+        <Route
+          path="dimore/new"
+          element={<DimoraDetailsScreen action={DimoraDetailsAction.Add} />}
+        />
         <Route path="itinerari" element={<ItinerariScreen />} />
         <Route path="itinerario/:id" element={<ItinerarioDetailsScreen />} />
         <Route path="credits" element={<CreditsScreen />} />

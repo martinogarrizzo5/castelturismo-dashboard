@@ -11,6 +11,7 @@
 /* Handle */
 ::-webkit-scrollbar-thumb {
     background: var(--primaryColor);
+    cursor: pointer;
 }
 
 /* Handle on hover */

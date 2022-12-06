@@ -11,16 +11,34 @@
         &__languageDropdown {}
     }
 
-    &__textarea {
-        flex: 1;
-        margin-bottom: 1rem;
+    &__contentSection {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+
+        &__textarea {
+            flex: 1;
+            margin-bottom: 1.5rem;
+        }
     }
 
-    &__credits {
-        color: var(--primaryColorDarker);
+    &__bottomActions {
+        display: flex;
+        justify-content: space-between;
+
+        &__credits {
+            color: var(--primaryColorDarker);
+        }
+
+        &__save {
+            align-self: flex-end;
+            display: flex;
+            align-items: center;
+        }
     }
 
-    &__save {
-        align-self: flex-end;
+    &__spinner {
+        margin-bottom: 10rem;
     }
 }

@@ -27,6 +27,14 @@ class Api {
     });
     return res.data as IIntroPercorso[];
   }
+
+  static async fetchCredits(params: IFetchCredits) {
+    const res = await axios.get(`/credits`, {
+      signal: params.signal,
+    });
+
+    return res.data[0] as ICredits;
+  }
 }
 
 export default Api;
