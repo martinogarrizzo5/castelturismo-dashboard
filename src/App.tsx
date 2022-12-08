@@ -8,12 +8,14 @@ import DimoraDetailsScreen, {
   DimoraDetailsAction,
 } from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
 import ItinerariScreen from "./screens/ItinerariScreen/ItinerariScreen";
-import ItinerarioDetailsScreen from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
+import ItinerarioDetailsScreen, {
+  ItinerarioDetailsAction,
+} from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>("some-token");
+  const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,7 +46,18 @@ function App() {
           element={<DimoraDetailsScreen action={DimoraDetailsAction.Add} />}
         />
         <Route path="itinerari" element={<ItinerariScreen />} />
-        <Route path="itinerario/:id" element={<ItinerarioDetailsScreen />} />
+        <Route
+          path="itinerari/:id"
+          element={
+            <ItinerarioDetailsScreen action={ItinerarioDetailsAction.Edit} />
+          }
+        />
+        <Route
+          path="itinerari/new"
+          element={
+            <ItinerarioDetailsScreen action={ItinerarioDetailsAction.Add} />
+          }
+        />
         <Route path="credits" element={<CreditsScreen />} />
         <Route path="settings" element={<SettingsScreen />} />
       </Route>

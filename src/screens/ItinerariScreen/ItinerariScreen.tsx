@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ReactComponent as AddSvg } from "../../assets/icons/add.svg";
 import IntroPercorsoCard from "../../components/IntroPercorsoCard/IntroPercorsoCard";
 import Spinner from "../../components/Spinner/Spinner";
@@ -6,6 +7,7 @@ import Api from "../../data/api";
 import "./ItinerariScreen.scss";
 
 function ItinerariScreen() {
+  const navigate = useNavigate();
   const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
   const [introPercorsi, setIntroPercorsi] = useState<IIntroPercorso[] | null>(
     null
@@ -33,11 +35,19 @@ function ItinerariScreen() {
     };
   }, []);
 
+  const onAddButtonClick = () => {
+    navigate("/app/itinerari/new");
+  };
+
   return (
     <main className="Itinerari page">
       <div className="Itinerari__titleSection">
         <h1 className="Itinerari__title title">Itinerari</h1>
-        <button type="button" className="Itinerari__addButton btn">
+        <button
+          type="button"
+          className="Itinerari__addButton btn"
+          onClick={onAddButtonClick}
+        >
           <AddSvg className="Itinerari__addButton__icon" />
           <span className="Itinerari__add-button__text">Aggiungi</span>
         </button>

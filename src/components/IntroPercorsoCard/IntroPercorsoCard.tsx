@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import TextUtils, { LanguageCode } from "../../utils/textUtils";
 import "./IntroPercorsoCard.scss";
 
@@ -6,8 +7,17 @@ interface IntroPercorsoCardProps {
 }
 
 function IntroPercorsoCard(props: IntroPercorsoCardProps) {
+  const navigate = useNavigate();
+
+  const cardClick = (percorso: IIntroPercorso) => {
+    navigate(`/app/itinerari/${percorso.id}`);
+  };
+
   return (
-    <figure className="IntroPercorsoCard">
+    <figure
+      className="IntroPercorsoCard"
+      onClick={() => cardClick(props.introPercorso)}
+    >
       <img
         src={props.introPercorso.path}
         alt="mappa percorso"

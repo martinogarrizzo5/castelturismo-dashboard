@@ -22,11 +22,8 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   return (
     <main className="page DimoraDetails">
       <div className="DimoraDetails__titleSection">
-        <button
-          className="input DimoraDetails__backButton"
-          onClick={handleBackButtonClick}
-        >
-          <BackSvg className="DimoraDetails__backButton__icon" />
+        <button className="backButton" onClick={handleBackButtonClick}>
+          <BackSvg className="backButton__icon" />
         </button>
         <h1 className="title DimoraDetails__titleSection__title">
           {props.action === DimoraDetailsAction.Add
