@@ -1,5 +1,6 @@
 :root {
     --primaryColorLight: #C7DFC5FF;
+    --primaryColorLighter: #A9C9A9FF;
     --primaryColor: #38852EFF;
     --primaryColorDark: #3B6835FF;
     --primaryColorDarker: #2E4F2BFF;
@@ -24,6 +25,10 @@
     --hoverIconForegroundColor: #20381e63;
     --hoverIconButtonColor: #c6dec463;
     --focusIconButtonColor: #c6dec4c7;
+
+    --deleteColor: rgb(233, 26, 3);
+    --deleteColorHover: rgb(215, 22, 0);
+    --deleteColorActive: rgb(191, 22, 3);
 
     --sideBarSize: 9rem;
 }

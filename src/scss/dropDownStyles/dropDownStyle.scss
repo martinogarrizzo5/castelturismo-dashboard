@@ -1,0 +1,89 @@
+.dropdown {
+    margin: 0;
+    padding: 0;
+
+    &__control {}
+
+    &__valueContainer {}
+
+    &__menu {
+        background-color: white;
+        border-radius: 1.2rem;
+        border: 1px solid var(--grayColor);
+        box-shadow: 0 0 1px 0 var(--shadowColor);
+    }
+
+    &__placeholder {
+        color: var(--grayColor);
+    }
+
+    &__option {
+        padding: 0.8rem 2rem;
+        transition: color 100ms, background-color 100ms;
+
+        &:first-of-type {
+            border-radius: 1.2rem 1.2rem 0 0;
+        }
+
+        &:last-of-type {
+            border-radius: 0 0 1.2rem 1.2rem;
+        }
+
+        &:only-child {
+            border-radius: 1.2rem;
+        }
+
+        &:hover {
+            background-color: var(--primaryColor);
+            color: white;
+        }
+
+        &--selected {
+            @extend .dropdown__option;
+            background-color: var(--primaryColorDark);
+            color: white;
+
+            &:hover {
+                background-color: var(--primaryColorDark);
+            }
+        }
+    }
+
+    &__noOptionsMessage {
+        padding: 0.8rem 2rem;
+    }
+
+    &__clearIndicator {
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--grayColor);
+
+        }
+    }
+}
+
+.multiDropdown {
+    &__control {
+        padding: 0.6rem;
+    }
+
+    &__multiValue {
+        padding: 0.6rem 0.8rem;
+        border-radius: 0.8rem;
+        font-size: 1.4rem;
+        background-color: var(--primaryColor);
+        color: white;
+        margin: 0.2rem;
+
+        &__remove {
+            padding: 0.2rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--primaryColorDark);
+            }
+        }
+    }
+}

@@ -12,6 +12,8 @@
 ::-webkit-scrollbar-thumb {
     background: var(--primaryColor);
     cursor: pointer;
+    border-radius: 20px;
+    background-clip: content-box;
 }
 
 /* Handle on hover */
