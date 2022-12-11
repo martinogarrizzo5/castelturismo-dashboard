@@ -7,13 +7,17 @@ interface IImagePickerProps {
   className?: string;
   onImagesChange: (newPhotos: FileList | null) => void;
   multipleFiles?: boolean;
+  onImageDelete?: (index: number) => void;
 }
 
 function ImagePicker(props: IImagePickerProps) {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    fileInput.current?.click();
+    if (fileInput.current) {
+      fileInput.current.value = ""; // allow to re-upload a deleted image
+      fileInput.current.click();
+    }
   };
 
   return (

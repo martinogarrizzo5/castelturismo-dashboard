@@ -11,8 +11,8 @@ function BackButton() {
   };
 
   return (
-    <button className="backButton" onClick={handleBackButtonClick}>
-      <BackSvg className="backButton__icon" />
+    <button className="iconButton backButton" onClick={handleBackButtonClick}>
+      <BackSvg className="iconButton__icon backButton__icon" />
     </button>
   );
 }

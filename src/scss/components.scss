@@ -63,3 +63,28 @@
     justify-content: center;
     align-items: center;
 }
+
+.iconButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem;
+    background-color: white;
+    border: 1px solid var(--grayColor);
+    box-shadow: 0 0 1px 0 var(--shadowColor);
+    border-radius: 50%;
+    transition: all 150ms;
+
+    &__icon {
+        flex-shrink: 0;
+        color: var(--primaryColorDarkest);
+    }
+
+    &:hover {
+        background-color: var(--backButtonHoverColor);
+    }
+
+    &:active {
+        background-color: var(--backButtonActiveColor);
+    }
+}

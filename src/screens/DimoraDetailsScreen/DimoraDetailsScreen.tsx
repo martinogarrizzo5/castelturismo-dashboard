@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
+import { ReactComponent as CloseSvg } from "../../assets/icons/close.svg";
 import BackButton from "../../components/BackButton/BackButton";
 import ImagePicker from "../../components/ImagePicker/ImagePicker";
 import { dropDownStyles } from "../../scss/dropDownStyles/dropDownStyle";
@@ -53,32 +54,32 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const handleImagesChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;
 
-    setImages([...images, ...Array.from(newPhotos)]);
+    // remove duplicated images
+    const newImages = Array.from(newPhotos).filter(
+      (image) => !images.find((img) => img.name === image.name)
+    );
+    setImages([...images, ...newImages]);
+  };
+
+  const handleImageDelete = (index: number) => {
+    setImages((prevImages) => prevImages.filter((img, i) => i !== index));
   };
 
   const handleCoverImageChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;
-
     setCoverImage(newPhotos[0]);
   };
 
   const handleBackgroundImageChange = (newPhoto: FileList | null) => {
     if (!newPhoto) return;
-
     setBackgroundImage(newPhoto[0]);
   };
 
-  const handleUpload = () => {
+  const handleDimoraSave = () => {
     const formData = new FormData();
     images.forEach((photo) => {
-      formData.append("images", photo);
+      formData.append("generalImages", photo);
     });
-  };
-
-  const handleDelete = (index: number) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
   };
 
   return (
@@ -220,12 +221,33 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
           <label className="label DimoraDetails__images__other__label">
             Altre Immagini
           </label>
-          <div className="input DimoraDetails__images__other__imagesWrapper">
+          <div className="input DimoraDetails__images__other__container">
             <ImagePicker
               onImagesChange={handleImagesChange}
               multipleFiles
               className="DimoraDetails__images__other__imagesWrapper__imagePicker"
             />
+            <div className="DimoraDetails__images__other__imagesWrapper">
+              {images.map((image, index) => (
+                <div
+                  className="DimoraDetails__images__other__imageContainer"
+                  key={`general-${image.name}`}
+                >
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt="general"
+                    className="DimoraDetails__images__other__imageContainer__image"
+                  />
+                  <button
+                    type="button"
+                    className="iconButton DimoraDetails__images__other__imageContainer__button"
+                    onClick={() => handleImageDelete(index)}
+                  >
+                    <CloseSvg className="iconButton__icon DimoraDetails__images__other__imageContainer__button__icon" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

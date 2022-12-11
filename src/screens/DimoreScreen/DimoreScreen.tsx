@@ -58,7 +58,7 @@ function DimoreScreen() {
       setIsLoadingContent(false);
       abortController.abort();
     };
-  }, [location, params]);
+  }, [params]);
 
   const onSearchedValueChanged = (val: string) => {
     setSearchedDimora(val);

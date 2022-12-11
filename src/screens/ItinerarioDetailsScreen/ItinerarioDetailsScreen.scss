@@ -3,4 +3,104 @@
         display: flex;
         align-items: center;
     }
+
+    &__content {
+        &__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+
+            &__left {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                margin-right: 20rem;
+            }
+
+            &__right {
+                display: flex;
+                align-items: center;
+            }
+
+            &__label {
+                margin-bottom: 1rem;
+            }
+
+            &__imagePicker {
+                display: flex;
+                flex-direction: column;
+                margin-right: 3rem;
+            }
+
+            &__imageWrapper {
+                height: 18rem;
+                width: 16rem;
+                // border: 1px solid var(--grayColor);
+                border-radius: 1.2rem;
+
+                &__image {
+                    height: 100%;
+                    width: 100%;
+                    object-fit: contain;
+                }
+            }
+        }
+
+        &__waypoints {
+            &__container {
+                display: flex;
+                flex: 1;
+                width: 100%;
+                margin-top: 2rem;
+                gap: 4rem;
+            }
+
+            &__search {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+
+                &__list {
+                    height: 100%;
+                    margin-top: 2.4rem;
+                }
+            }
+
+            &__list {
+                flex: 1;
+                height: 50rem;
+            }
+        }
+
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 3rem;
+
+        &__save {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        &__delete {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 2rem;
+            background-color: var(--deleteColor);
+
+            &:hover {
+                background-color: var(--deleteColorHover);
+            }
+
+            &:active {
+                background-color: var(--deleteColorActive);
+            }
+        }
+
+    }
 }

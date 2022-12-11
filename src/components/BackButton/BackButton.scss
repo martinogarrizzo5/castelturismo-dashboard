@@ -1,29 +1,11 @@
 .backButton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 0.2rem;
-    background-color: white;
-    border: 1px solid var(--grayColor);
-    box-shadow: 0 0 1px 0 var(--shadowColor);
     width: 4rem;
     height: 4rem;
-    border-radius: 50%;
     margin-right: 2rem;
-    transition: all 150ms;
 
     &__icon {
-        flex-shrink: 0;
         width: 2.8rem;
         height: 2.8rem;
-        color: var(--primaryColorDarkest);
-    }
-
-    &:hover {
-        background-color: var(--backButtonHoverColor);
-    }
-
-    &:active {
-        background-color: var(--backButtonActiveColor);
     }
 }
