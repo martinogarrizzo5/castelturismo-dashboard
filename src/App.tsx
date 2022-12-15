@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
-
 import LoginScreen from "./screens/LoginScreen/LoginScreen";
 import DashboardScreen from "./screens/DashBoard/Dashboard";
 import DimoreScreen from "./screens/DimoreScreen/DimoreScreen";
@@ -15,7 +14,7 @@ import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>("token");
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Select from "react-select";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
@@ -9,6 +9,10 @@ import ImagePicker from "../../components/ImagePicker/ImagePicker";
 import { dropDownStyles } from "../../scss/dropDownStyles/dropDownStyle";
 import "../../scss/dropDownStyles/dropDownStyle.scss";
 import "./DimoraDetailsScreen.scss";
+import Api from "../../data/api";
+import Dimora from "../../data/models/dimora";
+import Spinner from "../../components/Spinner/Spinner";
+import { useDialog } from "../../store/dialogStore";
 
 export enum DimoraDetailsAction {
   Add,
@@ -43,6 +47,10 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     { label: "Tedesco", value: 3 },
   ];
 
+  const { id } = useParams();
+  const dialogState = useDialog();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dimora, setDimora] = useState<Dimora | null>(null);
   const [selectedTypology, setSelectedTypology] = useState<any>(null);
   const [selectedZone, setSelectedZone] = useState<any>(null);
   const [selectedFilters, setSelectedFilters] = useState<any>([]);
@@ -50,6 +58,33 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const [images, setImages] = useState<File[]>([]);
   const [coverImage, setCoverImage] = useState<File>();
   const [backgroundImage, setBackgroundImage] = useState<File>();
+
+  // fetch dimora details and all available settings like filters
+  useEffect(() => {
+    // TODO: add to API an endpoint to retrieve a dimora based on its id
+    // TODO: add to API an endpoint to retrieve all the settings
+
+    // setIsLoading(true);
+    const abortController = new AbortController();
+    if (id) {
+      // Api.fetchDimoraById({
+      //   dimoraId: +id,
+      //   signal: abortController.signal,
+      // }).then((details) => {
+      //   console.log(details);
+      //   const dimora = new Dimora(details);
+      //   console.log(dimora);
+      //   setDimora(dimora);
+      //   setIsLoading(false);
+      // });
+    }
+
+    return () => {
+      // abort request if component unmounts
+      setIsLoading(false);
+      abortController.abort();
+    };
+  }, [id]);
 
   const handleImagesChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;
@@ -82,6 +117,15 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     });
   };
 
+  const showAlertDialog = () => {
+    dialogState.setDialog({
+      title: "Sei sicuro di voler eliminare la dimora?",
+      subTitle: "Una volta cancellata non potrà essere recuperata",
+      mainActionTitle: "Annulla",
+      sideActionTitle: "Conferma",
+    });
+    dialogState.showDialog();
+  };
   return (
     <main className="page DimoraDetails">
       <div className="DimoraDetails__titleSection">
@@ -92,177 +136,188 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
             : "Modifica Dimora"}
         </h1>
       </div>
-      <div className="DimoraDetails__fields">
-        <div className="DimoraDetails__fields__field">
-          <label className="label DimoraDetails__fields__field__label">
-            Nome
-          </label>
-          <input
-            type="text"
-            placeholder="Inserisci un nome"
-            className="input DimoraDetails__fields__field__input"
-            autoComplete="off"
-          />
-        </div>
-        <div className="DimoraDetails__fields__field">
-          <label className="label DimoraDetails__fields__field__label">
-            Tipologia
-          </label>
-          <Select
-            options={typologies}
-            value={selectedTypology}
-            onChange={setSelectedTypology}
-            unstyled
-            classNames={{
-              ...dropDownStyles,
-              container: (state) =>
-                "multiDropdown DimoraDetails__fields__dropdown",
-            }}
-          />
-        </div>
-        <div className="DimoraDetails__fields__field">
-          <label className="label DimoraDetails__fields__field__label">
-            Zona
-          </label>
-          <Select
-            options={zones}
-            value={selectedZone}
-            onChange={setSelectedZone}
-            unstyled
-            classNames={{
-              ...dropDownStyles,
-              container: (state) =>
-                "multiDropdown DimoraDetails__fields__dropdown",
-            }}
-          />
-        </div>
-        <div className="DimoraDetails__fields__field">
-          <label className="label DimoraDetails__fields__field__label">
-            Filtri
-          </label>
-          <Select
-            options={filters}
-            value={selectedFilters}
-            onChange={setSelectedFilters}
-            placeholder="Seleziona filtri"
-            unstyled
-            classNames={{
-              ...dropDownStyles,
-              container: (state) =>
-                "multiDropdown DimoraDetails__fields__filters",
-            }}
-            isMulti={true as any}
-          />
-        </div>
-      </div>
-      <div className="DimoraDetails__description">
-        <div className="DimoraDetails__description__title">
-          <label className="label DimoraDetails__description__label">
-            Descrizione
-          </label>
-          <Select
-            options={languages}
-            value={selectedLanguage}
-            onChange={setSelectedLanguage}
-            isSearchable={false}
-            unstyled
-            classNames={{
-              ...dropDownStyles,
-              container: (state) =>
-                "DimoraDetails__description__languageDropdown",
-              control: (state) =>
-                "btn DimoraDetails__description__languageDropdown__control",
-            }}
-          />
-        </div>
-        <textarea
-          className="textarea DimoraDetails__description__textarea"
-          placeholder="Inserisci una descrizione"
-        ></textarea>
-      </div>
-      <div className="DimoraDetails__images">
-        <div className="DimoraDetails__images__cover">
-          <label className="label DimoraDetails__images__cover__label">
-            Copertina
-          </label>
-          <div className="DimoraDetails__images__cover__imageWrapper">
-            {coverImage && (
-              <img
-                src={URL.createObjectURL(coverImage)}
-                alt="cover"
-                className="DimoraDetails__images__cover__image"
+      {!isLoading ? (
+        <>
+          <div className="DimoraDetails__fields">
+            <div className="DimoraDetails__fields__field">
+              <label className="label DimoraDetails__fields__field__label">
+                Nome
+              </label>
+              <input
+                type="text"
+                placeholder="Inserisci un nome"
+                className="input DimoraDetails__fields__field__input"
+                autoComplete="off"
               />
-            )}
-          </div>
-          <ImagePicker
-            onImagesChange={handleCoverImageChange}
-            className="DimoraDetails__images__cover__imagePicker"
-          />
-        </div>
-        <div className="DimoraDetails__images__background">
-          <label className="label DimoraDetails__images__background__label">
-            Sfondo Intro
-          </label>
-          <div className="DimoraDetails__images__background__imageWrapper">
-            {backgroundImage && (
-              <img
-                src={URL.createObjectURL(backgroundImage)}
-                alt="background"
-                className="DimoraDetails__images__background__image"
+            </div>
+            <div className="DimoraDetails__fields__field">
+              <label className="label DimoraDetails__fields__field__label">
+                Tipologia
+              </label>
+              <Select
+                options={typologies}
+                value={selectedTypology}
+                onChange={setSelectedTypology}
+                unstyled
+                classNames={{
+                  ...dropDownStyles,
+                  container: (state) =>
+                    "multiDropdown DimoraDetails__fields__dropdown",
+                }}
               />
-            )}
-          </div>
-          <ImagePicker
-            onImagesChange={handleBackgroundImageChange}
-            className="DimoraDetails__images__background__imagePicker"
-          />
-        </div>
-        <div className="DimoraDetails__images__other">
-          <label className="label DimoraDetails__images__other__label">
-            Altre Immagini
-          </label>
-          <div className="input DimoraDetails__images__other__container">
-            <ImagePicker
-              onImagesChange={handleImagesChange}
-              multipleFiles
-              className="DimoraDetails__images__other__imagesWrapper__imagePicker"
-            />
-            <div className="DimoraDetails__images__other__imagesWrapper">
-              {images.map((image, index) => (
-                <div
-                  className="DimoraDetails__images__other__imageContainer"
-                  key={`general-${image.name}`}
-                >
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt="general"
-                    className="DimoraDetails__images__other__imageContainer__image"
-                  />
-                  <button
-                    type="button"
-                    className="iconButton DimoraDetails__images__other__imageContainer__button"
-                    onClick={() => handleImageDelete(index)}
-                  >
-                    <CloseSvg className="iconButton__icon DimoraDetails__images__other__imageContainer__button__icon" />
-                  </button>
-                </div>
-              ))}
+            </div>
+            <div className="DimoraDetails__fields__field">
+              <label className="label DimoraDetails__fields__field__label">
+                Zona
+              </label>
+              <Select
+                options={zones}
+                value={selectedZone}
+                onChange={setSelectedZone}
+                unstyled
+                classNames={{
+                  ...dropDownStyles,
+                  container: (state) =>
+                    "multiDropdown DimoraDetails__fields__dropdown",
+                }}
+              />
+            </div>
+            <div className="DimoraDetails__fields__field">
+              <label className="label DimoraDetails__fields__field__label">
+                Filtri
+              </label>
+              <Select
+                options={filters}
+                value={selectedFilters}
+                onChange={setSelectedFilters}
+                placeholder="Seleziona filtri"
+                unstyled
+                classNames={{
+                  ...dropDownStyles,
+                  container: (state) =>
+                    "multiDropdown DimoraDetails__fields__filters",
+                }}
+                isMulti={true as any}
+              />
             </div>
           </div>
+          <div className="DimoraDetails__description">
+            <div className="DimoraDetails__description__title">
+              <label className="label DimoraDetails__description__label">
+                Descrizione
+              </label>
+              <Select
+                options={languages}
+                value={selectedLanguage}
+                onChange={setSelectedLanguage}
+                isSearchable={false}
+                unstyled
+                classNames={{
+                  ...dropDownStyles,
+                  container: (state) =>
+                    "DimoraDetails__description__languageDropdown",
+                  control: (state) =>
+                    "btn DimoraDetails__description__languageDropdown__control",
+                }}
+              />
+            </div>
+            <textarea
+              className="textarea DimoraDetails__description__textarea"
+              placeholder="Inserisci una descrizione"
+            ></textarea>
+          </div>
+          <div className="DimoraDetails__images">
+            <div className="DimoraDetails__images__cover">
+              <label className="label DimoraDetails__images__cover__label">
+                Copertina
+              </label>
+              <div className="DimoraDetails__images__cover__imageWrapper">
+                {coverImage && (
+                  <img
+                    src={URL.createObjectURL(coverImage)}
+                    alt="cover"
+                    className="DimoraDetails__images__cover__image"
+                  />
+                )}
+              </div>
+              <ImagePicker
+                onImagesChange={handleCoverImageChange}
+                className="DimoraDetails__images__cover__imagePicker"
+              />
+            </div>
+            <div className="DimoraDetails__images__background">
+              <label className="label DimoraDetails__images__background__label">
+                Sfondo Intro
+              </label>
+              <div className="DimoraDetails__images__background__imageWrapper">
+                {backgroundImage && (
+                  <img
+                    src={URL.createObjectURL(backgroundImage)}
+                    alt="background"
+                    className="DimoraDetails__images__background__image"
+                  />
+                )}
+              </div>
+              <ImagePicker
+                onImagesChange={handleBackgroundImageChange}
+                className="DimoraDetails__images__background__imagePicker"
+              />
+            </div>
+            <div className="DimoraDetails__images__other">
+              <label className="label DimoraDetails__images__other__label">
+                Altre Immagini
+              </label>
+              <div className="input DimoraDetails__images__other__container">
+                <ImagePicker
+                  onImagesChange={handleImagesChange}
+                  multipleFiles
+                  className="DimoraDetails__images__other__imagesWrapper__imagePicker"
+                />
+                <div className="DimoraDetails__images__other__imagesWrapper">
+                  {images.map((image, index) => (
+                    <div
+                      className="DimoraDetails__images__other__imageContainer"
+                      key={`general-${image.name}`}
+                    >
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt="general"
+                        className="DimoraDetails__images__other__imageContainer__image"
+                      />
+                      <button
+                        type="button"
+                        className="iconButton DimoraDetails__images__other__imageContainer__button"
+                        onClick={() => handleImageDelete(index)}
+                      >
+                        <CloseSvg className="iconButton__icon DimoraDetails__images__other__imageContainer__button__icon" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="DimoraDetails__actions">
+            {props.action === DimoraDetailsAction.Edit && (
+              <button
+                className="btn DimoraDetails__actions__delete"
+                onClick={showAlertDialog}
+              >
+                <DeleteSvg className="btn__icon" />
+                <span>Elimina</span>
+              </button>
+            )}
+            <button className="btn DimoraDetails__actions__save">
+              <CheckSvg className="btn__icon" />
+              <span>Salva</span>
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="centeredContent">
+          <Spinner />
         </div>
-      </div>
-      <div className="DimoraDetails__actions">
-        {props.action === DimoraDetailsAction.Edit && (
-          <button className="btn DimoraDetails__actions__delete">
-            <DeleteSvg className="btn__icon" />
-            <span>Elimina</span>
-          </button>
-        )}
-        <button className="btn DimoraDetails__actions__save">
-          <CheckSvg className="btn__icon" />
-          <span>Salva</span>
-        </button>
-      </div>
+      )}
     </main>
   );
 }

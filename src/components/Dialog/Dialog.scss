@@ -1,0 +1,44 @@
+.Dialog {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    min-width: 30rem;
+    max-width: 60rem;
+    padding: 6rem;
+    border-radius: 1.2rem;
+    background-color: var(--pageColor);
+    border: 1px solid var(--grayColor);
+
+    &__title {
+        margin-bottom: 1rem;
+    }
+
+    &__subTitle {
+        margin-bottom: 4rem;
+
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+
+        &__main {
+            flex: 1;
+            margin-left: 2.8rem;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        &__side {
+            flex: 1;
+        }
+    }
+
+
+}

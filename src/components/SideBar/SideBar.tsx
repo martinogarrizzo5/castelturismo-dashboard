@@ -9,8 +9,11 @@ import SideBarLink from "./components/SideBarLink";
 
 import "./SideBar.scss";
 import SideBarButton from "./components/SideBarButton";
+import { useDialog } from "../../store/dialogStore";
 
 function SideBar() {
+  const showDialog = useDialog((state) => state.showDialog);
+
   return (
     <nav className="SideBar">
       <img src={logoImg} alt="logo" className="SideBar__logo" />
@@ -20,7 +23,7 @@ function SideBar() {
         <SideBarLink icon={InfoSvg} to="/app/credits" />
         <SideBarLink icon={SettingsSvg} to="/app/settings" />
         <div className="SideBar__links__logout">
-          <SideBarButton icon={LogoutSvg} onClick={() => {}} />
+          <SideBarButton icon={LogoutSvg} onClick={showDialog} />
         </div>
       </div>
     </nav>
