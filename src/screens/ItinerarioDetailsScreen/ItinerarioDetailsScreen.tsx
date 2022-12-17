@@ -8,6 +8,7 @@ import "./ItinerarioDetailsScreen.scss";
 import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
+import { useDialog } from "../../store/dialogStore";
 
 export enum ItinerarioDetailsAction {
   Add,
@@ -23,6 +24,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchableDimore, setSearchableDimore] = useState<Dimora[]>([]);
+  const dialogState = useDialog();
 
   useEffect(() => {
     setIsLoading(true);
@@ -42,6 +44,17 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
       abortController.abort();
     };
   }, []);
+
+  const showAlertDialog = () => {
+    dialogState.setDialog({
+      title: "Sei sicuro di voler eliminare l'itinerario?",
+      subTitle: "Una volta cancellato non potrà essere recuperato",
+      mainActionTitle: "Annulla",
+      sideActionTitle: "Conferma",
+      onMainActionClick: dialogState.dismissDialog,
+    });
+    dialogState.showDialog();
+  };
 
   return (
     <main className="ItinerarioDetails page">
@@ -102,7 +115,10 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
           </div>
           <div className="ItinerarioDetails__actions">
             {props.action === ItinerarioDetailsAction.Edit && (
-              <button className="btn ItinerarioDetails__actions__delete">
+              <button
+                className="btn ItinerarioDetails__actions__delete"
+                onClick={showAlertDialog}
+              >
                 <DeleteSvg className="btn__icon" />
                 <span>Elimina</span>
               </button>

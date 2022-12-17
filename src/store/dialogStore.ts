@@ -10,7 +10,7 @@ export interface IDialog {
   onDismiss?: () => void;
 }
 
-interface DialogState {
+interface IDialogState {
   isDialogShown: boolean;
   dialog: IDialog | null;
   showDialog: () => void;
@@ -18,7 +18,7 @@ interface DialogState {
   setDialog: (dialog: IDialog) => void;
 }
 
-export const useDialog = create<DialogState>()((set) => ({
+export const useDialog = create<IDialogState>()((set) => ({
   isDialogShown: false,
   dialog: null,
   showDialog: () => set({ isDialogShown: true }),

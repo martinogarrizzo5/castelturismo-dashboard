@@ -12,7 +12,18 @@ import SideBarButton from "./components/SideBarButton";
 import { useDialog } from "../../store/dialogStore";
 
 function SideBar() {
-  const showDialog = useDialog((state) => state.showDialog);
+  const dialogState = useDialog();
+
+  const onLogout = () => {
+    dialogState.setDialog({
+      title: "Vuoi veramente uscire?",
+      subTitle: "Dovrai eseguire il login di nuovo per accedere alla dashboard",
+      mainActionTitle: "Annulla",
+      sideActionTitle: "Conferma Logout",
+      onMainActionClick: dialogState.dismissDialog,
+    });
+    dialogState.showDialog();
+  };
 
   return (
     <nav className="SideBar">
@@ -23,7 +34,7 @@ function SideBar() {
         <SideBarLink icon={InfoSvg} to="/app/credits" />
         <SideBarLink icon={SettingsSvg} to="/app/settings" />
         <div className="SideBar__links__logout">
-          <SideBarButton icon={LogoutSvg} onClick={showDialog} />
+          <SideBarButton icon={LogoutSvg} onClick={onLogout} />
         </div>
       </div>
     </nav>

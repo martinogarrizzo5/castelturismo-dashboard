@@ -117,12 +117,13 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     });
   };
 
-  const showAlertDialog = () => {
+  const showDeletionAlertDialog = () => {
     dialogState.setDialog({
       title: "Sei sicuro di voler eliminare la dimora?",
       subTitle: "Una volta cancellata non potrà essere recuperata",
       mainActionTitle: "Annulla",
       sideActionTitle: "Conferma",
+      onMainActionClick: dialogState.dismissDialog,
     });
     dialogState.showDialog();
   };
@@ -301,7 +302,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
             {props.action === DimoraDetailsAction.Edit && (
               <button
                 className="btn DimoraDetails__actions__delete"
-                onClick={showAlertDialog}
+                onClick={showDeletionAlertDialog}
               >
                 <DeleteSvg className="btn__icon" />
                 <span>Elimina</span>
