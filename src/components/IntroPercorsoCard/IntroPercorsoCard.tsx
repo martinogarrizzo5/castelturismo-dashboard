@@ -18,11 +18,13 @@ function IntroPercorsoCard(props: IntroPercorsoCardProps) {
       className="IntroPercorsoCard"
       onClick={() => cardClick(props.introPercorso)}
     >
-      <img
-        src={props.introPercorso.path}
-        alt="mappa percorso"
-        className="IntroPercorsoCard__image"
-      />
+      <div className="IntroPercorsoCard__image-wrapper">
+        <img
+          src={props.introPercorso.path}
+          alt="mappa percorso"
+          className="IntroPercorsoCard__image"
+        />
+      </div>
       <figcaption className="IntroPercorsoCard__caption">
         {TextUtils.getText(props.introPercorso.descrizione, LanguageCode.it)}
       </figcaption>

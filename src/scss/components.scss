@@ -58,6 +58,7 @@
 }
 
 .centeredContent {
+    align-self: center;
     flex: 1;
     display: flex;
     justify-content: center;
@@ -104,5 +105,22 @@
     &:active {
         background-color: var(--primaryColorLighter);
         color: var(--primaryColorDarkest);
+    }
+}
+
+.brand {
+    @extend .title;
+
+    &__firstPart {
+        font-weight: 400;
+        letter-spacing: 0.6rem;
+        font-family: "Ubuntu", sans-serif;
+        padding-left: 0.6rem;
+    }
+
+    &__secondPart {
+        font-weight: 700;
+        letter-spacing: 1.2rem;
+        padding-left: 1.2rem;
     }
 }

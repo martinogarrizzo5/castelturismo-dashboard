@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import LoginScreen from "./screens/LoginScreen/LoginScreen";
 import DashboardScreen from "./screens/DashBoard/Dashboard";
@@ -12,26 +12,34 @@ import ItinerarioDetailsScreen, {
 } from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
+import { useAuth } from "./store/authStore";
+import LoadingScreen from "./screens/LoadingScreen/LoadingScreen";
 
 function App() {
-  const [token, setToken] = useState<string | null>("token");
+  const authState = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    authState.fetchUser();
+  }, []);
 
   useEffect(() => {
     const path = location.pathname;
 
     // auth guards
-    if (token === null && path === "/login") return;
-    if (token === null) return navigate("/login", { replace: true });
+    if (authState.isLogging) return;
+    if (authState.token === null && path === "/login") return;
+    if (authState.token === null) return navigate("/login", { replace: true });
 
     // TODO: send token to server to check if it's valid
 
     // redirect to dashboard if user is logged in
     if (path === "/" || path === "/login" || path === "/app")
       return navigate("/app/dimore", { replace: true });
-  }, [token, location]);
+  }, [authState, location]);
 
+  if (authState.isLogging) return <LoadingScreen />;
   return (
     <Routes>
       <Route path="/app/*" element={<DashboardScreen />}>

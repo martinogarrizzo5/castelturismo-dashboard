@@ -4,11 +4,20 @@ import ImagePicker from "../../components/ImagePicker/ImagePicker";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
+import { ReactComponent as AddSvg } from "../../assets/icons/add.svg";
 import "./ItinerarioDetailsScreen.scss";
 import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import { useDialog } from "../../store/dialogStore";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "react-beautiful-dnd";
+import ItinerarioDimoraCard from "../../components/ItinerarioDimoraCard/ItinerarioDimoraCard";
+import classNames from "classnames";
 
 export enum ItinerarioDetailsAction {
   Add,
@@ -23,7 +32,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [image, setImage] = useState<FileList | null>();
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchableDimore, setSearchableDimore] = useState<Dimora[]>([]);
+  const [searchableDimore, setSearchableDimore] = useState<Dimora[] | null>(
+    null
+  );
+  const [itinerarioDimore, setItinerarioDimore] = useState<Dimora[] | null>(
+    null
+  );
   const dialogState = useDialog();
 
   useEffect(() => {
@@ -34,7 +48,9 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
       (dimoreData) => {
         const dimore = dimoreData.map((data) => new Dimora(data));
         setSearchableDimore(dimore);
-        console.log(dimore);
+
+        // TODO: REMOVE
+        setItinerarioDimore(dimore);
       }
     );
 
@@ -54,6 +70,58 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
       onMainActionClick: dialogState.dismissDialog,
     });
     dialogState.showDialog();
+  };
+
+  const searchableDimoreCard = (dimora: Dimora) => {
+    return (
+      <div
+        key={`searchable-${dimora.id}`}
+        className="ItinerarioDetails__searchableDimora"
+      >
+        <img
+          src={dimora.coverPath}
+          alt="dimora"
+          className="ItinerarioDetails__searchableDimora__img"
+        />
+        <p className="ItinerarioDetails__searchableDimora__name">
+          {dimora.nome}
+        </p>
+        <button
+          type="button"
+          className="btn ItinerarioDetails__searchableDimora__addBtn"
+        >
+          <AddSvg className="btn__icon ItinerarioDetails__searchableDimora__addBtn__icon" />
+        </button>
+      </div>
+    );
+  };
+
+  // reorder the items in list when finished dragging
+  const onDragEnd = (result: DropResult) => {
+    console.log(result);
+
+    const { source, destination } = result;
+    if (!destination || !itinerarioDimore) {
+      return;
+    }
+    if (source.index === destination.index) {
+      return;
+    }
+
+    // swap the two dimore
+    const newItems = [...itinerarioDimore];
+    const [removedItem] = newItems.splice(source.index, 1);
+    newItems.splice(destination.index, 0, removedItem);
+
+    setItinerarioDimore(newItems);
+  };
+
+  const onRemove = (index: number) => {
+    if (!itinerarioDimore) return;
+    const newItems = [...itinerarioDimore];
+    newItems.splice(index, 1);
+
+    setItinerarioDimore(newItems);
   };
 
   return (
@@ -101,14 +169,68 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
             <div className="ItinerarioDetails__content__waypoints">
               <h2 className="title">Tappe Percorso</h2>
               <div className="ItinerarioDetails__content__waypoints__container">
-                <div className="input ItinerarioDetails__content__waypoints__list"></div>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="droppable">
+                    {(provided, snapshot) => (
+                      <div
+                        className="input ItinerarioDetails__content__waypoints__list"
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                      >
+                        {itinerarioDimore != null ? (
+                          itinerarioDimore.map((dimora, i) => (
+                            <Draggable
+                              draggableId={`id-dimora-draggable-${dimora.id}`}
+                              key={`key-dimora-draggable-${dimora.id}`}
+                              index={i}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  className={classNames(
+                                    "ItinerarioDetails__content__waypoints__list__item-wrapper",
+                                    snapshot.isDragging &&
+                                      "ItinerarioDetails__content__waypoints__list__item-wrapper--dragging"
+                                  )}
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <ItinerarioDimoraCard
+                                    dimora={dimora}
+                                    onRemove={() => onRemove(i)}
+                                    position={i + 1}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))
+                        ) : (
+                          <div className="centeredContent">
+                            <Spinner />
+                          </div>
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
                 <div className="ItinerarioDetails__content__waypoints__search">
                   <SearchBar
                     value={searchedDimora}
                     onChange={setSearchedDimora}
                     onSearch={() => {}}
                   />
-                  <div className="input ItinerarioDetails__content__waypoints__search__list"></div>
+                  <div className="input ItinerarioDetails__content__waypoints__search__list">
+                    {searchableDimore !== null ? (
+                      searchableDimore.map((dimora) =>
+                        searchableDimoreCard(dimora)
+                      )
+                    ) : (
+                      <div className="centeredContent">
+                        <Spinner />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

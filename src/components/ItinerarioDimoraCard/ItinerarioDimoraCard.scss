@@ -1,0 +1,54 @@
+.ItinerarioDimoraCard {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+
+
+    &__nome {
+        margin-right: 2rem;
+    }
+
+    &__img {
+        flex-shrink: 0;
+        width: 4rem;
+        height: 5rem;
+        object-fit: cover;
+        margin-right: 2rem;
+    }
+
+    &__position-badge {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid black;
+        width: 2.5rem;
+        height: 2.5rem;
+        margin-right: 1.4rem;
+        font-size: 1.4rem;
+    }
+
+    &__removeBtn {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        padding: 0.4rem;
+        border-radius: 0.8rem;
+
+        &__icon {
+            width: 2.4rem;
+            color: var(--iconForegroundColor);
+        }
+
+        &:hover {
+            background-color: var(--hoverIconButtonColor);
+        }
+
+        &:active {
+            background-color: var(--focusIconButtonColor);
+        }
+    }
+
+
+}

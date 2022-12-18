@@ -1,27 +1,32 @@
 import React, { useState } from "react";
+import { useAuth } from "../../store/authStore";
 import classNames from "classnames";
-import logoImg from "../../assets/images/logo.jpg";
+import logoImg from "../../assets/images/logo-min.jpg";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import "./LoginScreen.scss";
 
 function LoginScreen() {
+  const authState = useAuth();
   const [saveCredentials, setSaveCredentials] = useState<boolean>(false);
 
   const onCredentialsButtonClick = () => {
     setSaveCredentials((prevVal) => !prevVal);
   };
 
-  const onFormSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+  const onFormSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
+    await authState.login("", "");
   };
 
   return (
     <main className="Login">
       <div className="Login__content">
-        <img src={logoImg} alt="logo" className="Login__logo" />
+        <div className="Login__logo-wrapper">
+          <img src={logoImg} alt="logo" className="Login__logo" />
+        </div>
         <h1 className="Login__title">
-          <span className="title Login__title__firstPart">castelfranco</span>
-          <span className="title Login__title__secondPart">VENETO</span>
+          <span className="brand__firstPart">castelfranco</span>
+          <span className="brand__secondPart">VENETO</span>
         </h1>
         <form className="Login__form" onSubmit={onFormSubmit}>
           <label className="Login__form__label" htmlFor="username">
