@@ -35,6 +35,19 @@
         width: 2rem;
         height: 2rem;
     }
+
+    &--disabled {
+        background-color: var(--grayColor);
+        cursor: default;
+
+        &:hover {
+            background-color: var(--grayColor);
+        }
+
+        &:active {
+            background-color: var(--grayColor);
+        }
+    }
 }
 
 .input {

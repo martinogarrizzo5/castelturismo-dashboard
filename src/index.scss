@@ -47,6 +47,8 @@ input {
   background-color: transparent;
   outline: none;
   border: none;
+  min-width: none;
+  min-height: none;
 }
 
 ::selection {

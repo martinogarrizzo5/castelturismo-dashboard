@@ -14,6 +14,7 @@ export const useAuth = create<IAuth>()((set) => ({
   isLogging: true,
   fetchUser: async () => {
     // api request with token
+    await delay(1000);
     set({ token: "token", isLogging: false });
   },
   login: async (username, password) => {

@@ -32,6 +32,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [image, setImage] = useState<FileList | null>();
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [allDimore, setAllDimore] = useState<Dimora[] | null>(null);
   const [searchableDimore, setSearchableDimore] = useState<Dimora[] | null>(
     null
   );
@@ -48,8 +49,9 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
       (dimoreData) => {
         const dimore = dimoreData.map((data) => new Dimora(data));
         setSearchableDimore(dimore);
+        setAllDimore(dimore);
 
-        // TODO: REMOVE
+        // TODO: remove and call the api for the itinerario
         setItinerarioDimore(dimore);
       }
     );
@@ -73,6 +75,10 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   };
 
   const searchableDimoreCard = (dimora: Dimora) => {
+    const isAlreadySelected =
+      itinerarioDimore &&
+      itinerarioDimore.findIndex((el) => el.id === dimora.id) !== -1;
+
     return (
       <div
         key={`searchable-${dimora.id}`}
@@ -88,12 +94,24 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
         </p>
         <button
           type="button"
-          className="btn ItinerarioDetails__searchableDimora__addBtn"
+          className={classNames(
+            "btn ItinerarioDetails__searchableDimora__addBtn",
+            isAlreadySelected && "btn--disabled"
+          )}
+          onClick={
+            isAlreadySelected ? () => {} : () => addDimoraToItinerario(dimora)
+          }
         >
           <AddSvg className="btn__icon ItinerarioDetails__searchableDimora__addBtn__icon" />
         </button>
       </div>
     );
+  };
+
+  const addDimoraToItinerario = (dimora: Dimora) => {
+    if (itinerarioDimore) {
+      setItinerarioDimore((prevDimore) => [...prevDimore!, dimora]);
+    }
   };
 
   // reorder the items in list when finished dragging
@@ -122,6 +140,13 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     newItems.splice(index, 1);
 
     setItinerarioDimore(newItems);
+  };
+
+  const onSearch = (text: string) => {
+    if (!allDimore) return [];
+
+    const dimore = allDimore!.filter((el) => el.nome.includes(text));
+    setSearchableDimore(dimore);
   };
 
   return (
@@ -218,7 +243,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                   <SearchBar
                     value={searchedDimora}
                     onChange={setSearchedDimora}
-                    onSearch={() => {}}
+                    onSearch={onSearch}
                   />
                   <div className="input ItinerarioDetails__content__waypoints__search__list">
                     {searchableDimore !== null ? (

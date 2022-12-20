@@ -6,7 +6,7 @@ import "./SearchBar.scss";
 interface ISearchBarProps {
   value: string;
   onChange: (value: string) => void;
-  onSearch: () => void;
+  onSearch: (value: string) => void;
 }
 
 function SearchBar(props: ISearchBarProps) {
@@ -19,8 +19,13 @@ function SearchBar(props: ISearchBarProps) {
     props.onChange("");
   };
 
+  const onEnterClick = (e: any) => {
+    e.preventDefault();
+    props.onSearch(props.value);
+  };
+
   return (
-    <div className="SearchBar">
+    <form className="SearchBar" onSubmit={onEnterClick}>
       <div className="SearchBar__input">
         <input
           type="text"
@@ -42,12 +47,12 @@ function SearchBar(props: ISearchBarProps) {
       <button
         className="btn SearchBar__button"
         type="button"
-        onClick={props.onSearch}
+        onClick={() => props.onSearch(props.value)}
       >
         <SearchSvg className="SearchBar__button__icon" />
         <span className="SearchBar__button__text">Cerca</span>
       </button>
-    </div>
+    </form>
   );
 }
 
