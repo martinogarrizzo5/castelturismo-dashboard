@@ -7,6 +7,7 @@ interface ISearchBarProps {
   value: string;
   onChange: (value: string) => void;
   onSearch: (value: string) => void;
+  onDeleteSearch?: () => void;
 }
 
 function SearchBar(props: ISearchBarProps) {
@@ -24,6 +25,13 @@ function SearchBar(props: ISearchBarProps) {
     props.onSearch(props.value);
   };
 
+  const onSearchDelete = () => {
+    clearInput();
+    if (props.onDeleteSearch) {
+      props.onDeleteSearch();
+    }
+  };
+
   return (
     <form className="SearchBar" onSubmit={onEnterClick}>
       <div className="SearchBar__input">
@@ -37,7 +45,7 @@ function SearchBar(props: ISearchBarProps) {
         <button
           className="SearchBar__input__cancelButton"
           type="button"
-          onClick={clearInput}
+          onClick={onSearchDelete}
         >
           {props.value && (
             <CloseSvg className="SearchBar__input__cancelButton__icon" />

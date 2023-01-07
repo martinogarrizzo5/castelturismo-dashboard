@@ -145,8 +145,19 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const onSearch = (text: string) => {
     if (!allDimore) return [];
 
-    const dimore = allDimore!.filter((el) => el.nome.includes(text));
+    const dimore = allDimore!.filter((el) =>
+      el.nome.toLowerCase().includes(text.toLowerCase())
+    );
     setSearchableDimore(dimore);
+  };
+
+  const noItemAvailableDiv = (title: string) => {
+    // TODO: find image for no element
+    return (
+      <div>
+        <h3 className="title">{title}</h3>
+      </div>
+    );
   };
 
   return (
@@ -244,6 +255,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                     value={searchedDimora}
                     onChange={setSearchedDimora}
                     onSearch={onSearch}
+                    onDeleteSearch={() => setSearchableDimore(allDimore)}
                   />
                   <div className="input ItinerarioDetails__content__waypoints__search__list">
                     {searchableDimore !== null ? (
