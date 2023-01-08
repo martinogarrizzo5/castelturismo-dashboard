@@ -18,6 +18,7 @@ import {
 } from "react-beautiful-dnd";
 import ItinerarioDimoraCard from "../../components/ItinerarioDimoraCard/ItinerarioDimoraCard";
 import classNames from "classnames";
+import { useParams } from "react-router-dom";
 
 export enum ItinerarioDetailsAction {
   Add,
@@ -29,6 +30,7 @@ interface IItinerarioDetailsScreenProps {
 }
 
 function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
+  const { id } = useParams();
   const [image, setImage] = useState<FileList | null>();
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,22 +41,35 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [itinerarioDimore, setItinerarioDimore] = useState<Dimora[] | null>(
     null
   );
+  const [itinerarioName, setItinerarioName] = useState<string | null>(null);
   const dialogState = useDialog();
 
   useEffect(() => {
     setIsLoading(true);
     const abortController = new AbortController();
 
-    Api.fetchAllDimore({ signal: abortController.signal }).then(
-      (dimoreData) => {
-        const dimore = dimoreData.map((data) => new Dimora(data));
-        setSearchableDimore(dimore);
-        setAllDimore(dimore);
+    if (!id) return;
+    const itinerarioId = parseInt(id, 10);
+    if (isNaN(itinerarioId)) return;
 
-        // TODO: remove and call the api for the itinerario
-        setItinerarioDimore(dimore);
-      }
-    );
+    (async () => {
+      const result = await Promise.all([
+        Api.fetchAllDimore({ signal: abortController.signal }),
+        Api.fetchPercorsoById({
+          signal: abortController.signal,
+          id: itinerarioId,
+        }),
+      ]);
+
+      const [allDimoreData, percorso] = result;
+      const allDimore = allDimoreData.map((data) => new Dimora(data));
+      const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
+
+      setSearchableDimore(allDimore);
+      setItinerarioDimore(itinerarioDimore);
+      setItinerarioName(percorso.descrizione);
+      setAllDimore(allDimore);
+    })();
 
     return () => {
       // abort request if component unmounts
@@ -154,8 +169,8 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const noItemAvailableDiv = (title: string) => {
     // TODO: find image for no element
     return (
-      <div>
-        <h3 className="title">{title}</h3>
+      <div className="centeredContent">
+        <h3 className="subTitle">{title}</h3>
       </div>
     );
   };
@@ -182,6 +197,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                   className="input"
                   type="text"
                   placeholder="Inserisci un nome"
+                  defaultValue={itinerarioName !== null ? itinerarioName : ""}
                 />
               </div>
               <div className="ItinerarioDetails__content__top__right">
@@ -213,6 +229,8 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                       >
+                        {itinerarioDimore?.length === 0 &&
+                          noItemAvailableDiv("Nessuna dimora selezionata")}
                         {itinerarioDimore != null ? (
                           itinerarioDimore.map((dimora, i) => (
                             <Draggable

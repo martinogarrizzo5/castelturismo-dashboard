@@ -2,10 +2,18 @@ import React, { useState, useEffect } from "react";
 import Spinner from "../../components/Spinner/Spinner";
 import Api from "../../data/api";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
+import {
+  useNotification,
+  NotificationType,
+} from "../../store/notificationStore";
 import "./CreditsScreen.scss";
+import classNames from "classnames";
 
 function CreditsScreen() {
+  const notificationState = useNotification();
   const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [actualCredits, setActualCredits] = useState<ICredits | null>(null);
   const [credits, setCredits] = useState<ICredits | null>(null);
 
   useEffect(() => {
@@ -14,6 +22,7 @@ function CreditsScreen() {
 
     Api.fetchCredits({ signal: abortController.signal })
       .then((credits) => {
+        setActualCredits(credits);
         setCredits(credits);
         setIsLoadingContent(false);
       })
@@ -37,6 +46,20 @@ function CreditsScreen() {
     );
   };
 
+  const onCreditsSave = async () => {
+    if (!credits) return;
+    // TODO: handle error case
+    setIsSaving(true);
+    const response = await Api.updateCredits({
+      description: credits.descrizione,
+    });
+    const message = response.message;
+    setIsSaving(false);
+    setActualCredits(credits);
+    notificationState.showNotification(message, NotificationType.Success);
+  };
+
+  const saveActionEnabled = actualCredits?.descrizione !== credits?.descrizione;
   return (
     <main className="page Credits">
       <div className="Credits__titleSection">
@@ -55,9 +78,25 @@ function CreditsScreen() {
             <p className="Credits__bottomActions__credits">
               Made With ❤️ By Martin Meneghetti
             </p>
-            <button className="btn Credits__bottomActions__save">
-              <CheckSvg className="btn__icon" />
-              <p>Salva</p>
+            <button
+              className={classNames(
+                "btn Credits__bottomActions__save",
+                !saveActionEnabled && "btn--disabled"
+              )}
+              onClick={
+                saveActionEnabled && !isSaving ? onCreditsSave : () => {}
+              }
+            >
+              {isSaving ? (
+                <div className="centeredContent">
+                  <Spinner className="spinner--sm spinner--white" />
+                </div>
+              ) : (
+                <>
+                  <CheckSvg className="btn__icon" />
+                  <p>Salva</p>
+                </>
+              )}
             </button>
           </div>
         </div>

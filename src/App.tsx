@@ -28,18 +28,16 @@ function App() {
     const path = location.pathname;
 
     // auth guards
-    if (authState.isLogging) return;
-    if (authState.token === null && path === "/login") return;
-    if (authState.token === null) return navigate("/login", { replace: true });
-
-    // TODO: send token to server to check if it's valid
+    if (authState.isUserLoading) return;
+    if (authState.user === null && path === "/login") return;
+    if (authState.user === null) return navigate("/login", { replace: true });
 
     // redirect to dashboard if user is logged in
     if (path === "/" || path === "/login" || path === "/app")
       return navigate("/app/dimore", { replace: true });
   }, [authState, location]);
 
-  if (authState.isLogging) return <LoadingScreen />;
+  if (authState.isUserLoading) return <LoadingScreen />;
   return (
     <Routes>
       <Route path="/app/*" element={<DashboardScreen />}>

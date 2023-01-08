@@ -5,6 +5,7 @@ class Dimora implements IDimora {
   descrizione: string;
   tipologia: string;
   foto: IFoto[];
+  filtri: IFiltro[];
   placeholderImage: string =
     "https://cdn.pixabay.com/photo/2012/02/28/10/22/background-18176_960_720.jpg";
 
@@ -15,6 +16,7 @@ class Dimora implements IDimora {
     this.descrizione = dimora.descrizione;
     this.tipologia = dimora.tipologia;
     this.foto = dimora.foto;
+    this.filtri = dimora.filtri;
   }
 
   get coverPath(): string {

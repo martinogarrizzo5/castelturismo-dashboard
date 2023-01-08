@@ -61,23 +61,25 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
 
   // fetch dimora details and all available settings like filters
   useEffect(() => {
-    // TODO: add to API an endpoint to retrieve a dimora based on its id
-    // TODO: add to API an endpoint to retrieve all the settings
-
-    // setIsLoading(true);
     const abortController = new AbortController();
-    if (id) {
-      // Api.fetchDimoraById({
-      //   dimoraId: +id,
-      //   signal: abortController.signal,
-      // }).then((details) => {
-      //   console.log(details);
-      //   const dimora = new Dimora(details);
-      //   console.log(dimora);
-      //   setDimora(dimora);
-      //   setIsLoading(false);
-      // });
-    }
+    (async () => {
+      if (id) {
+        // TODO: redirect in case of invalid id
+        setIsLoading(true);
+        const results = await Promise.all([
+          Api.fetchDimoraById({
+            id: +id,
+            signal: abortController.signal,
+          }),
+        ]);
+
+        const [dimoraData] = results;
+
+        const dimora = new Dimora(dimoraData);
+        setIsLoading(false);
+        setDimora(dimora);
+      }
+    })();
 
     return () => {
       // abort request if component unmounts
@@ -149,6 +151,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 placeholder="Inserisci un nome"
                 className="input DimoraDetails__fields__field__input"
                 autoComplete="off"
+                defaultValue={dimora?.nome}
               />
             </div>
             <div className="DimoraDetails__fields__field">

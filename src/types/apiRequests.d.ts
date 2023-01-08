@@ -5,13 +5,26 @@ interface IRequest {
 interface IFetchAllDimoreRequest extends IRequest {}
 
 interface IFetchDimoraById extends IRequest {
-  dimoraId: number;
+  id: number;
+}
+
+interface ISearchDimora extends IRequest {
+  name?: string | null;
+  zonaId?: number | null;
 }
 
 interface IFetchDimoreByZona extends IRequest {
-  zonaId: number;
+  id: number;
 }
 
 interface IFetchIntroPercorsi extends IRequest {}
 
+interface IFetchPercorsoById extends IRequest {
+  id: number;
+}
+
 interface IFetchCredits extends IRequest {}
+
+interface IUpdateCredits extends IRequest {
+  description: string;
+}
