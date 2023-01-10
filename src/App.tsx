@@ -8,7 +8,7 @@ import DimoraDetailsScreen, {
 } from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
 import ItinerariScreen from "./screens/ItinerariScreen/ItinerariScreen";
 import ItinerarioDetailsScreen, {
-  ItinerarioDetailsAction,
+  PageType,
 } from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
@@ -53,15 +53,11 @@ function App() {
         <Route path="itinerari" element={<ItinerariScreen />} />
         <Route
           path="itinerari/:id"
-          element={
-            <ItinerarioDetailsScreen action={ItinerarioDetailsAction.Edit} />
-          }
+          element={<ItinerarioDetailsScreen pageType={PageType.Edit} />}
         />
         <Route
           path="itinerari/new"
-          element={
-            <ItinerarioDetailsScreen action={ItinerarioDetailsAction.Add} />
-          }
+          element={<ItinerarioDetailsScreen pageType={PageType.Add} />}
         />
         <Route path="credits" element={<CreditsScreen />} />
         <Route path="settings" element={<SettingsScreen />} />

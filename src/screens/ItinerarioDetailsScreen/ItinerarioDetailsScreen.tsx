@@ -18,20 +18,22 @@ import {
 } from "react-beautiful-dnd";
 import ItinerarioDimoraCard from "../../components/ItinerarioDimoraCard/ItinerarioDimoraCard";
 import classNames from "classnames";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-export enum ItinerarioDetailsAction {
+export enum PageType {
   Add,
   Edit,
 }
 
 interface IItinerarioDetailsScreenProps {
-  action: ItinerarioDetailsAction;
+  pageType: PageType;
 }
 
 function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const { id } = useParams();
-  const [image, setImage] = useState<FileList | null>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [image, setImage] = useState<string | FileList | null>();
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [allDimore, setAllDimore] = useState<Dimora[] | null>(null);
@@ -45,38 +47,58 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const dialogState = useDialog();
 
   useEffect(() => {
-    setIsLoading(true);
     const abortController = new AbortController();
 
-    if (!id) return;
-    const itinerarioId = parseInt(id, 10);
-    if (isNaN(itinerarioId)) return;
-
-    (async () => {
-      const result = await Promise.all([
-        Api.fetchAllDimore({ signal: abortController.signal }),
-        Api.fetchPercorsoById({
-          signal: abortController.signal,
-          id: itinerarioId,
-        }),
-      ]);
-
-      const [allDimoreData, percorso] = result;
-      const allDimore = allDimoreData.map((data) => new Dimora(data));
-      const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
-
-      setSearchableDimore(allDimore);
-      setItinerarioDimore(itinerarioDimore);
-      setItinerarioName(percorso.descrizione);
-      setAllDimore(allDimore);
-    })();
-
+    if (props.pageType === PageType.Add) {
+      initAddPage(abortController);
+    } else if (props.pageType === PageType.Edit) {
+      initEditPage(abortController);
+    }
     return () => {
       // abort request if component unmounts
       setIsLoading(false);
       abortController.abort();
     };
-  }, []);
+  }, [location, id]);
+
+  const initEditPage = async (abortController: AbortController) => {
+    const itinerarioId = parseInt(id!, 10);
+    if (isNaN(itinerarioId))
+      return navigate("/app/itinerari/new", { replace: true });
+
+    setIsLoading(true);
+    const result = await Promise.all([
+      Api.fetchAllDimore({ signal: abortController.signal }),
+      Api.fetchPercorsoById({
+        signal: abortController.signal,
+        id: itinerarioId,
+      }),
+    ]);
+
+    const [allDimoreData, percorso] = result;
+    const allDimore = allDimoreData.map((data) => new Dimora(data));
+    const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
+
+    setIsLoading(false);
+    setSearchableDimore(allDimore);
+    setItinerarioDimore(itinerarioDimore);
+    setItinerarioName(percorso.descrizione);
+    setImage(percorso.imageUrl);
+    setAllDimore(allDimore);
+  };
+
+  const initAddPage = async (abortController: AbortController) => {
+    setIsLoading(true);
+    const allDimoreData = await Api.fetchAllDimore({
+      signal: abortController.signal,
+    });
+    const allDimore = allDimoreData.map((data) => new Dimora(data));
+    setIsLoading(false);
+    setSearchableDimore(allDimore);
+    setItinerarioDimore([]);
+    setItinerarioName("");
+    setAllDimore(allDimore);
+  };
 
   const showAlertDialog = () => {
     dialogState.setDialog({
@@ -167,7 +189,6 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   };
 
   const noItemAvailableDiv = (title: string) => {
-    // TODO: find image for no element
     return (
       <div className="centeredContent">
         <h3 className="subTitle">{title}</h3>
@@ -175,17 +196,18 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     );
   };
 
+  const canShowPage = !isLoading && itinerarioDimore;
   return (
     <main className="ItinerarioDetails page">
       <div className="ItinerarioDetails__titleSection">
         <BackButton />
         <h1 className="title">
-          {props.action === ItinerarioDetailsAction.Add
+          {props.pageType === PageType.Add
             ? "Aggiungi Itinerario"
             : "Modifica Itinerario"}
         </h1>
       </div>
-      {isLoading ? (
+      {canShowPage ? (
         <>
           <div className="ItinerarioDetails__content">
             <div className="ItinerarioDetails__content__top">
@@ -208,9 +230,16 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                   <ImagePicker onImagesChange={setImage} />
                 </div>
                 <div className="ItinerarioDetails__content__top__imageWrapper">
-                  {image && (
+                  {image instanceof FileList && (
                     <img
                       src={URL.createObjectURL(image[0])}
+                      alt="percorso"
+                      className="ItinerarioDetails__content__top__imageWrapper__image"
+                    />
+                  )}
+                  {typeof image === "string" && (
+                    <img
+                      src={image}
                       alt="percorso"
                       className="ItinerarioDetails__content__top__imageWrapper__image"
                     />
@@ -229,40 +258,34 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                       >
-                        {itinerarioDimore?.length === 0 &&
+                        {itinerarioDimore.length === 0 &&
                           noItemAvailableDiv("Nessuna dimora selezionata")}
-                        {itinerarioDimore != null ? (
-                          itinerarioDimore.map((dimora, i) => (
-                            <Draggable
-                              draggableId={`id-dimora-draggable-${dimora.id}`}
-                              key={`key-dimora-draggable-${dimora.id}`}
-                              index={i}
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  className={classNames(
-                                    "ItinerarioDetails__content__waypoints__list__item-wrapper",
-                                    snapshot.isDragging &&
-                                      "ItinerarioDetails__content__waypoints__list__item-wrapper--dragging"
-                                  )}
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                >
-                                  <ItinerarioDimoraCard
-                                    dimora={dimora}
-                                    onRemove={() => onRemove(i)}
-                                    position={i + 1}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))
-                        ) : (
-                          <div className="centeredContent">
-                            <Spinner />
-                          </div>
-                        )}
+                        {itinerarioDimore.map((dimora, i) => (
+                          <Draggable
+                            draggableId={`id-dimora-draggable-${dimora.id}`}
+                            key={`key-dimora-draggable-${dimora.id}`}
+                            index={i}
+                          >
+                            {(provided, snapshot) => (
+                              <div
+                                className={classNames(
+                                  "ItinerarioDetails__content__waypoints__list__item-wrapper",
+                                  snapshot.isDragging &&
+                                    "ItinerarioDetails__content__waypoints__list__item-wrapper--dragging"
+                                )}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <ItinerarioDimoraCard
+                                  dimora={dimora}
+                                  onRemove={() => onRemove(i)}
+                                  position={i + 1}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
                         {provided.placeholder}
                       </div>
                     )}
@@ -291,7 +314,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
             </div>
           </div>
           <div className="ItinerarioDetails__actions">
-            {props.action === ItinerarioDetailsAction.Edit && (
+            {props.pageType === PageType.Edit && (
               <button
                 className="btn ItinerarioDetails__actions__delete"
                 onClick={showAlertDialog}

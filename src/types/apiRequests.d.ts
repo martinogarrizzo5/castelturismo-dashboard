@@ -28,3 +28,11 @@ interface IFetchCredits extends IRequest {}
 interface IUpdateCredits extends IRequest {
   description: string;
 }
+
+interface IFetchLanguages extends IRequest {}
+
+interface IFetchDimoraTypes extends IRequest {}
+
+interface IFetchZone extends IRequest {}
+
+interface IFetchFilters extends IRequest {}

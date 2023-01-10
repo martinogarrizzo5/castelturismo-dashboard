@@ -3,6 +3,12 @@ interface IZona {
   dimore: Dimora[];
 }
 
+interface IIntroZona {
+  id: number;
+  descrizione: string;
+  dimoreCount: number;
+}
+
 interface IDimora {
   id: number;
   zona: string;
@@ -29,6 +35,12 @@ interface IFiltro {
   stato: string;
 }
 
+interface ILingua {
+  id: number;
+  codice: string;
+  nome: string;
+}
+
 interface IIntroPercorso {
   id: number;
   descrizione: string;
@@ -41,4 +53,9 @@ interface IPercorso {
   descrizione: string;
   durata: number;
   imageUrl: string;
+}
+
+interface ITipoDimora {
+  id: number;
+  tipo: string;
 }

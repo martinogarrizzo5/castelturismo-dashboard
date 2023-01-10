@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
@@ -24,23 +24,6 @@ interface IDimoraDetailsScreenProps {
 }
 
 function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
-  const typologies = [
-    { value: "Bar", label: "Bar" },
-    { value: "Hotel", label: "Hotel" },
-    { value: "Monumento", label: "Monumento" },
-  ];
-  const zones = [
-    { label: "Corso XXIX Aprile", value: 1 },
-    { label: "Tra le Mura", value: 2 },
-    { label: "Piazza Giorgione", value: 3 },
-    { label: "Borgo Treviso", value: 4 },
-  ];
-  const filters = [
-    { label: "Edifici Religiosi", value: 1 },
-    { label: "Tra le Mura", value: 2 },
-    { label: "Piazza Giorgione", value: 3 },
-    { label: "Borgo Treviso", value: 4 },
-  ];
   const languages = [
     { label: "Italiano", value: 1 },
     { label: "Inglese", value: 2 },
@@ -48,13 +31,26 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   ];
 
   const { id } = useParams();
+  const navigate = useNavigate();
   const dialogState = useDialog();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [dimora, setDimora] = useState<Dimora | null>(null);
+  const [availableFilters, setAvailableFilters] = useState<IFiltro[] | null>(
+    null
+  );
+  const [availableZones, setAvailableZones] = useState<IIntroZona[] | null>(
+    null
+  );
+  const [availableTypes, setAvailableTypes] = useState<ITipoDimora[] | null>(
+    null
+  );
+
   const [selectedTypology, setSelectedTypology] = useState<any>(null);
   const [selectedZone, setSelectedZone] = useState<any>(null);
   const [selectedFilters, setSelectedFilters] = useState<any>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<any>(languages[0]);
+
   const [images, setImages] = useState<File[]>([]);
   const [coverImage, setCoverImage] = useState<File>();
   const [backgroundImage, setBackgroundImage] = useState<File>();
@@ -63,22 +59,32 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   useEffect(() => {
     const abortController = new AbortController();
     (async () => {
-      if (id) {
-        // TODO: redirect in case of invalid id
-        setIsLoading(true);
-        const results = await Promise.all([
-          Api.fetchDimoraById({
-            id: +id,
-            signal: abortController.signal,
-          }),
-        ]);
+      if (!id) return navigate("/app/dimore/new", { replace: true });
+      // TODO: HANDLE NEW DIMORA
+      const dimoraId = parseInt(id, 10);
+      if (isNaN(dimoraId))
+        return navigate("/app/dimore/new", { replace: true });
 
-        const [dimoraData] = results;
+      setIsLoading(true);
+      const results = await Promise.all([
+        Api.fetchDimoraById({
+          id: +id,
+          signal: abortController.signal,
+        }),
+        Api.fetchFilters({}),
+        Api.fetchZone({}),
+        Api.fetchDimoreTypes({}),
+        Api.fetchLanguages({}),
+      ]);
+      setIsLoading(false);
 
-        const dimora = new Dimora(dimoraData);
-        setIsLoading(false);
-        setDimora(dimora);
-      }
+      const [dimoraData, filters, zones, dimoreTypes, languages] = results;
+      const dimora = new Dimora(dimoraData);
+      setDimora(dimora);
+      console.log(filters);
+      setAvailableFilters(filters);
+      setAvailableZones(zones);
+      setAvailableTypes(dimoreTypes);
     })();
 
     return () => {
@@ -129,6 +135,35 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     });
     dialogState.showDialog();
   };
+
+  const makeDropDownFilters = (filters: IFiltro[]) => {
+    return filters.map((filter) => ({ label: filter.stato, value: filter }));
+  };
+
+  const makeDropDownLanguages = (languages: ILingua[]) => {
+    return languages.map((language) => ({
+      label: language.nome,
+      value: language,
+    }));
+  };
+
+  const makeDropDownTypes = (dimoraTypes: ITipoDimora[]) => {
+    return dimoraTypes.map((type) => ({
+      label: type.tipo,
+      value: type,
+    }));
+  };
+
+  const makeDropDownZones = (zones: IIntroZona[]) => {
+    return zones.map((zone) => ({
+      label: zone.descrizione,
+      value: zone,
+    }));
+  };
+
+  const canShowScreen =
+    !isLoading && availableFilters && availableTypes && availableZones;
+
   return (
     <main className="page DimoraDetails">
       <div className="DimoraDetails__titleSection">
@@ -139,7 +174,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
             : "Modifica Dimora"}
         </h1>
       </div>
-      {!isLoading ? (
+      {canShowScreen ? (
         <>
           <div className="DimoraDetails__fields">
             <div className="DimoraDetails__fields__field">
@@ -159,7 +194,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Tipologia
               </label>
               <Select
-                options={typologies}
+                options={makeDropDownTypes(availableTypes)}
                 value={selectedTypology}
                 onChange={setSelectedTypology}
                 unstyled
@@ -175,7 +210,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Zona
               </label>
               <Select
-                options={zones}
+                options={makeDropDownZones(availableZones)}
                 value={selectedZone}
                 onChange={setSelectedZone}
                 unstyled
@@ -191,7 +226,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Filtri
               </label>
               <Select
-                options={filters}
+                options={makeDropDownFilters(availableFilters)}
                 value={selectedFilters}
                 onChange={setSelectedFilters}
                 placeholder="Seleziona filtri"

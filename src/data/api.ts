@@ -60,6 +60,36 @@ class Api {
 
     return res.data as ICreditsUpdateResponse;
   }
+
+  static async fetchLanguages(params: IFetchLanguages) {
+    const res = await axios.get("/lingue");
+
+    return res.data as ILingua[];
+  }
+
+  static async fetchDimoreTypes(params: IFetchDimoraTypes) {
+    const res = await axios.get("/tipi-dimora");
+
+    return res.data as any[];
+  }
+
+  static async fetchFilters(params: IFetchFilters) {
+    const res = await axios.get("/filtri");
+
+    return res.data as IFiltro[];
+  }
+
+  static async fetchZone(params: IFetchZone) {
+    const res = await axios.get("/zone");
+
+    return res.data as IIntroZona[];
+  }
+
+  static async fetchDimoraTypes(params: IFetchDimoraTypes) {
+    const res = await axios.get("/tipi-dimora");
+
+    return res.data as ITipoDimora[];
+  }
 }
 
 export default Api;
