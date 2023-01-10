@@ -4,11 +4,11 @@ import LoginScreen from "./screens/LoginScreen/LoginScreen";
 import DashboardScreen from "./screens/DashBoard/Dashboard";
 import DimoreScreen from "./screens/DimoreScreen/DimoreScreen";
 import DimoraDetailsScreen, {
-  DimoraDetailsAction,
+  DimoraDetailsPageType,
 } from "./screens/DimoraDetailsScreen/DimoraDetailsScreen";
 import ItinerariScreen from "./screens/ItinerariScreen/ItinerariScreen";
 import ItinerarioDetailsScreen, {
-  PageType,
+  PageType as ItinerarioDetailsPageType,
 } from "./screens/ItinerarioDetailsScreen/ItinerarioDetailsScreen";
 import CreditsScreen from "./screens/CreditsScreen/CreditsScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
@@ -44,20 +44,28 @@ function App() {
         <Route path="dimore" element={<DimoreScreen />} />
         <Route
           path="dimore/:id"
-          element={<DimoraDetailsScreen action={DimoraDetailsAction.Edit} />}
+          element={
+            <DimoraDetailsScreen pageType={DimoraDetailsPageType.Edit} />
+          }
         />
         <Route
           path="dimore/new"
-          element={<DimoraDetailsScreen action={DimoraDetailsAction.Add} />}
+          element={<DimoraDetailsScreen pageType={DimoraDetailsPageType.Add} />}
         />
         <Route path="itinerari" element={<ItinerariScreen />} />
         <Route
           path="itinerari/:id"
-          element={<ItinerarioDetailsScreen pageType={PageType.Edit} />}
+          element={
+            <ItinerarioDetailsScreen
+              pageType={ItinerarioDetailsPageType.Edit}
+            />
+          }
         />
         <Route
           path="itinerari/new"
-          element={<ItinerarioDetailsScreen pageType={PageType.Add} />}
+          element={
+            <ItinerarioDetailsScreen pageType={ItinerarioDetailsPageType.Add} />
+          }
         />
         <Route path="credits" element={<CreditsScreen />} />
         <Route path="settings" element={<SettingsScreen />} />

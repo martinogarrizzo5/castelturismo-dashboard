@@ -14,42 +14,36 @@ import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import { useDialog } from "../../store/dialogStore";
 
-export enum DimoraDetailsAction {
+export enum DimoraDetailsPageType {
   Add,
   Edit,
 }
 
 interface IDimoraDetailsScreenProps {
-  action: DimoraDetailsAction;
+  pageType: DimoraDetailsPageType;
 }
 
 function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
-  const languages = [
-    { label: "Italiano", value: 1 },
-    { label: "Inglese", value: 2 },
-    { label: "Tedesco", value: 3 },
-  ];
-
   const { id } = useParams();
   const navigate = useNavigate();
+
   const dialogState = useDialog();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [dimora, setDimora] = useState<Dimora | null>(null);
-  const [availableFilters, setAvailableFilters] = useState<IFiltro[] | null>(
+  const [filterOptions, setFilterOptions] = useState<IFiltro[] | null>(null);
+  const [zoneOptions, setZoneOptions] = useState<IIntroZona[] | null>(null);
+  const [TypologyOptions, setTypologyOptions] = useState<ITipoDimora[] | null>(
     null
   );
-  const [availableZones, setAvailableZones] = useState<IIntroZona[] | null>(
-    null
-  );
-  const [availableTypes, setAvailableTypes] = useState<ITipoDimora[] | null>(
+  const [languageOptions, setLanguageOptions] = useState<ILingua[] | null>(
     null
   );
 
-  const [selectedTypology, setSelectedTypology] = useState<any>(null);
-  const [selectedZone, setSelectedZone] = useState<any>(null);
-  const [selectedFilters, setSelectedFilters] = useState<any>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<any>(languages[0]);
+  const [dimora, setDimora] = useState<Dimora | null>(null);
+  const [typology, setTypology] = useState<ITipoDimora | null>(null);
+  const [zone, setZone] = useState<IIntroZona | null>(null);
+  const [filters, setFilters] = useState<IFiltro[]>([]);
+  const [language, setLanguage] = useState<ILingua | null>(null);
 
   const [images, setImages] = useState<File[]>([]);
   const [coverImage, setCoverImage] = useState<File>();
@@ -81,10 +75,26 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       const [dimoraData, filters, zones, dimoreTypes, languages] = results;
       const dimora = new Dimora(dimoraData);
       setDimora(dimora);
-      console.log(filters);
-      setAvailableFilters(filters);
-      setAvailableZones(zones);
-      setAvailableTypes(dimoreTypes);
+
+      // set options and display the current set values
+      setFilterOptions(filters);
+      setZoneOptions(zones);
+      setTypologyOptions(dimoreTypes);
+      setLanguageOptions(languages);
+
+      const selectedType = dimoreTypes.find(
+        (el) => el.tipo === dimora.tipologia
+      );
+      const selectedZone = zones.find((el) => el.descrizione === dimora.zona);
+
+      if (selectedType) {
+        setTypology(selectedType);
+      }
+      if (selectedZone) {
+        setZone(selectedZone);
+      }
+      setLanguage(languages[0]);
+      setFilters(dimora.filtri);
     })();
 
     return () => {
@@ -92,7 +102,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       setIsLoading(false);
       abortController.abort();
     };
-  }, [id]);
+  }, [id, navigate]);
 
   const handleImagesChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;
@@ -136,40 +146,19 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     dialogState.showDialog();
   };
 
-  const makeDropDownFilters = (filters: IFiltro[]) => {
-    return filters.map((filter) => ({ label: filter.stato, value: filter }));
-  };
-
-  const makeDropDownLanguages = (languages: ILingua[]) => {
-    return languages.map((language) => ({
-      label: language.nome,
-      value: language,
-    }));
-  };
-
-  const makeDropDownTypes = (dimoraTypes: ITipoDimora[]) => {
-    return dimoraTypes.map((type) => ({
-      label: type.tipo,
-      value: type,
-    }));
-  };
-
-  const makeDropDownZones = (zones: IIntroZona[]) => {
-    return zones.map((zone) => ({
-      label: zone.descrizione,
-      value: zone,
-    }));
-  };
-
   const canShowScreen =
-    !isLoading && availableFilters && availableTypes && availableZones;
+    !isLoading &&
+    filterOptions &&
+    TypologyOptions &&
+    zoneOptions &&
+    languageOptions;
 
   return (
     <main className="page DimoraDetails">
       <div className="DimoraDetails__titleSection">
         <BackButton />
         <h1 className="title DimoraDetails__titleSection__title">
-          {props.action === DimoraDetailsAction.Add
+          {props.pageType === DimoraDetailsPageType.Add
             ? "Crea Nuova Dimora"
             : "Modifica Dimora"}
         </h1>
@@ -194,9 +183,11 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Tipologia
               </label>
               <Select
-                options={makeDropDownTypes(availableTypes)}
-                value={selectedTypology}
-                onChange={setSelectedTypology}
+                options={TypologyOptions}
+                value={typology}
+                onChange={setTypology}
+                getOptionLabel={(option) => option.tipo}
+                getOptionValue={(option) => option.id.toString()}
                 unstyled
                 classNames={{
                   ...dropDownStyles,
@@ -210,9 +201,11 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Zona
               </label>
               <Select
-                options={makeDropDownZones(availableZones)}
-                value={selectedZone}
-                onChange={setSelectedZone}
+                options={zoneOptions}
+                value={zone}
+                getOptionLabel={(option) => option.descrizione}
+                getOptionValue={(option) => option.id.toString()}
+                onChange={setZone}
                 unstyled
                 classNames={{
                   ...dropDownStyles,
@@ -226,9 +219,10 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Filtri
               </label>
               <Select
-                options={makeDropDownFilters(availableFilters)}
-                value={selectedFilters}
-                onChange={setSelectedFilters}
+                options={filterOptions}
+                value={filters}
+                getOptionLabel={(option) => option.stato}
+                getOptionValue={(option) => option.id.toString()}
                 placeholder="Seleziona filtri"
                 unstyled
                 classNames={{
@@ -236,7 +230,9 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                   container: (state) =>
                     "multiDropdown DimoraDetails__fields__filters",
                 }}
+                // TODO: fix types on library update
                 isMulti={true as any}
+                onChange={setFilters as any}
               />
             </div>
           </div>
@@ -246,9 +242,11 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Descrizione
               </label>
               <Select
-                options={languages}
-                value={selectedLanguage}
-                onChange={setSelectedLanguage}
+                options={languageOptions}
+                value={language}
+                onChange={setLanguage}
+                getOptionLabel={(option) => option.nome}
+                getOptionValue={(option) => option.id.toString()}
                 isSearchable={false}
                 unstyled
                 classNames={{
@@ -337,7 +335,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
             </div>
           </div>
           <div className="DimoraDetails__actions">
-            {props.action === DimoraDetailsAction.Edit && (
+            {props.pageType === DimoraDetailsPageType.Edit && (
               <button
                 className="btn DimoraDetails__actions__delete"
                 onClick={showDeletionAlertDialog}

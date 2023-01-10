@@ -70,7 +70,7 @@ class Api {
   static async fetchDimoreTypes(params: IFetchDimoraTypes) {
     const res = await axios.get("/tipi-dimora");
 
-    return res.data as any[];
+    return res.data as ITipoDimora[];
   }
 
   static async fetchFilters(params: IFetchFilters) {
