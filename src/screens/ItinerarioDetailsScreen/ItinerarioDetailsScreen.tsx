@@ -33,8 +33,8 @@ interface IItinerarioDetailsScreenProps {
 }
 
 interface NameTranslation {
-  languageId: string;
-  name: string;
+  languageCode: string;
+  text: string;
 }
 
 function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
@@ -52,7 +52,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [itinerarioDimore, setItinerarioDimore] = useState<Dimora[] | null>(
     null
   );
-  const [names, setNames] = useState<NameTranslation[] | null>(null);
+  const [names, setNames] = useState<Map<string, string> | null>(null);
   const dialogState = useDialog();
   const [languageOptions, setLanguagesOptions] = useState<ILingua[] | null>(
     null
@@ -96,11 +96,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setIsLoading(false);
     setSearchableDimore(allDimore);
     setItinerarioDimore(itinerarioDimore);
-    // setNames(percorso.descrizione);
     setImage(percorso.imageUrl);
     setAllDimore(allDimore);
     setLanguagesOptions(languages);
     setLanguage(languages[0]);
+    const names = TextUtils.getTranslations(percorso.descrizione);
+    setNames(names);
   };
 
   const initAddPage = async (abortController: AbortController) => {
@@ -212,6 +213,20 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     );
   };
 
+  const getTranslatedName = () => {
+    if (!language || !names) return "";
+    const translation = names.get(language.codice);
+    if (!translation) return "";
+
+    return translation;
+  };
+
+  const onNameChange = (text: string) => {
+    const newNames = new Map(names);
+    newNames.set(language!.codice, text);
+    setNames(newNames);
+  };
+
   const canShowPage = !isLoading && itinerarioDimore && languageOptions;
   return (
     <main className="ItinerarioDetails page">
@@ -249,12 +264,13 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                     }}
                   />
                 </div>
-                {/* <input
+                <input
                   className="input"
                   type="text"
                   placeholder="Inserisci un nome"
-                  defaultValue={names !== null ? names : ""}
-                /> */}
+                  value={getTranslatedName()}
+                  onChange={(e) => onNameChange(e.target.value)}
+                />
               </div>
               <div className="ItinerarioDetails__content__top__right">
                 <div className="label ItinerarioDetails__content__top__imagePicker">

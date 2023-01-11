@@ -13,7 +13,6 @@ import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import { useDialog } from "../../store/dialogStore";
-import { abort } from "process";
 
 export enum DimoraDetailsPageType {
   Add,
@@ -53,9 +52,9 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   // fetch dimora details and all available settings like filters
   useEffect(() => {
     const abortController = new AbortController();
-    if (props.pageType == DimoraDetailsPageType.Edit) {
+    if (props.pageType === DimoraDetailsPageType.Edit) {
       initEditPage(abortController);
-    } else if (props.pageType == DimoraDetailsPageType.Add) {
+    } else if (props.pageType === DimoraDetailsPageType.Add) {
       initAddPage(abortController);
     }
 

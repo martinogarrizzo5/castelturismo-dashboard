@@ -31,7 +31,18 @@ class TextUtils {
     return translatedText;
   }
 
-  static getTranslations(text: string) {}
+  static getTranslations(text: string) {
+    const translations = new Map<string, string>();
+    const allTexts = text.split("<");
+
+    for (let translation of allTexts) {
+      const languageCode = translation.split(">")[0];
+      const text = translation.substring(languageCode.length + 1);
+      translations.set(languageCode, text);
+    }
+
+    return translations;
+  }
 }
 
 export default TextUtils;
