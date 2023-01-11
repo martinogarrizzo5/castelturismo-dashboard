@@ -13,6 +13,7 @@ import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import { useDialog } from "../../store/dialogStore";
+import { abort } from "process";
 
 export enum DimoraDetailsPageType {
   Add,
@@ -52,50 +53,11 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   // fetch dimora details and all available settings like filters
   useEffect(() => {
     const abortController = new AbortController();
-    (async () => {
-      if (!id) return navigate("/app/dimore/new", { replace: true });
-      // TODO: HANDLE NEW DIMORA
-      const dimoraId = parseInt(id, 10);
-      if (isNaN(dimoraId))
-        return navigate("/app/dimore/new", { replace: true });
-
-      setIsLoading(true);
-      const results = await Promise.all([
-        Api.fetchDimoraById({
-          id: +id,
-          signal: abortController.signal,
-        }),
-        Api.fetchFilters({}),
-        Api.fetchZone({}),
-        Api.fetchDimoreTypes({}),
-        Api.fetchLanguages({}),
-      ]);
-      setIsLoading(false);
-
-      const [dimoraData, filters, zones, dimoreTypes, languages] = results;
-      const dimora = new Dimora(dimoraData);
-      setDimora(dimora);
-
-      // set options and display the current set values
-      setFilterOptions(filters);
-      setZoneOptions(zones);
-      setTypologyOptions(dimoreTypes);
-      setLanguageOptions(languages);
-
-      const selectedType = dimoreTypes.find(
-        (el) => el.tipo === dimora.tipologia
-      );
-      const selectedZone = zones.find((el) => el.descrizione === dimora.zona);
-
-      if (selectedType) {
-        setTypology(selectedType);
-      }
-      if (selectedZone) {
-        setZone(selectedZone);
-      }
-      setLanguage(languages[0]);
-      setFilters(dimora.filtri);
-    })();
+    if (props.pageType == DimoraDetailsPageType.Edit) {
+      initEditPage(abortController);
+    } else if (props.pageType == DimoraDetailsPageType.Add) {
+      initAddPage(abortController);
+    }
 
     return () => {
       // abort request if component unmounts
@@ -103,6 +65,67 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       abortController.abort();
     };
   }, [id, navigate]);
+
+  const initAddPage = async (abortController: AbortController) => {
+    setIsLoading(true);
+    const result = await Promise.all([
+      Api.fetchFilters({ signal: abortController.signal }),
+      Api.fetchZone({ signal: abortController.signal }),
+      Api.fetchDimoreTypes({ signal: abortController.signal }),
+      Api.fetchLanguages({ signal: abortController.signal }),
+    ]);
+    setIsLoading(false);
+
+    const [filters, zones, dimoreTypes, languages] = result;
+
+    // set options and display the current set values
+    setFilterOptions(filters);
+    setZoneOptions(zones);
+    setTypologyOptions(dimoreTypes);
+    setLanguageOptions(languages);
+    setLanguage(languages[0]);
+  };
+
+  const initEditPage = async (abortController: AbortController) => {
+    if (!id) return navigate("/app/dimore/new", { replace: true });
+    const dimoraId = parseInt(id, 10);
+    if (isNaN(dimoraId)) return navigate("/app/dimore/new", { replace: true });
+
+    setIsLoading(true);
+    const results = await Promise.all([
+      Api.fetchDimoraById({
+        id: +id,
+        signal: abortController.signal,
+      }),
+      Api.fetchFilters({ signal: abortController.signal }),
+      Api.fetchZone({ signal: abortController.signal }),
+      Api.fetchDimoreTypes({ signal: abortController.signal }),
+      Api.fetchLanguages({ signal: abortController.signal }),
+    ]);
+    setIsLoading(false);
+
+    const [dimoraData, filters, zones, dimoreTypes, languages] = results;
+    const dimora = new Dimora(dimoraData);
+    setDimora(dimora);
+
+    // set options and display the current set values
+    setFilterOptions(filters);
+    setZoneOptions(zones);
+    setTypologyOptions(dimoreTypes);
+    setLanguageOptions(languages);
+
+    const selectedType = dimoreTypes.find((el) => el.tipo === dimora.tipologia);
+    const selectedZone = zones.find((el) => el.descrizione === dimora.zona);
+
+    if (selectedType) {
+      setTypology(selectedType);
+    }
+    if (selectedZone) {
+      setZone(selectedZone);
+    }
+    setLanguage(languages[0]);
+    setFilters(dimora.filtri);
+  };
 
   const handleImagesChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;

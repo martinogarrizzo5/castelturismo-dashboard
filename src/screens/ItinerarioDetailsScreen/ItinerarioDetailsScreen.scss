@@ -16,6 +16,12 @@
                 flex-direction: column;
                 flex: 1;
                 margin-right: 20rem;
+
+                &__section {
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: space-between;
+                }
             }
 
             &__right {

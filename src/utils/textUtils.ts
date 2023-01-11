@@ -17,10 +17,10 @@ class TextUtils {
 
     for (let translation of allTexts) {
       if (translation.startsWith(languageCode)) {
-        translatedText = translation.substring(3);
+        translatedText = translation.substring(languageCode.length + 1);
       }
       if (translation.startsWith(defaultLanguageCode)) {
-        defaultTranslation = translation.substring(3);
+        defaultTranslation = translation.substring(languageCode.length + 1);
       }
     }
 
@@ -30,6 +30,8 @@ class TextUtils {
 
     return translatedText;
   }
+
+  static getTranslations(text: string) {}
 }
 
 export default TextUtils;

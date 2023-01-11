@@ -6,6 +6,7 @@ import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
 import { ReactComponent as AddSvg } from "../../assets/icons/add.svg";
 import "./ItinerarioDetailsScreen.scss";
+import { dropDownStyles } from "../../scss/dropDownStyles/dropDownStyle";
 import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
@@ -19,6 +20,8 @@ import {
 import ItinerarioDimoraCard from "../../components/ItinerarioDimoraCard/ItinerarioDimoraCard";
 import classNames from "classnames";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Select from "react-select";
+import TextUtils from "../../utils/textUtils";
 
 export enum PageType {
   Add,
@@ -29,10 +32,16 @@ interface IItinerarioDetailsScreenProps {
   pageType: PageType;
 }
 
+interface NameTranslation {
+  languageId: string;
+  name: string;
+}
+
 function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
   const [image, setImage] = useState<string | FileList | null>();
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -43,8 +52,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const [itinerarioDimore, setItinerarioDimore] = useState<Dimora[] | null>(
     null
   );
-  const [itinerarioName, setItinerarioName] = useState<string | null>(null);
+  const [names, setNames] = useState<NameTranslation[] | null>(null);
   const dialogState = useDialog();
+  const [languageOptions, setLanguagesOptions] = useState<ILingua[] | null>(
+    null
+  );
+  const [language, setLanguage] = useState<ILingua | null>(null);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -73,18 +86,21 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
         signal: abortController.signal,
         id: itinerarioId,
       }),
+      Api.fetchLanguages({ signal: abortController.signal }),
     ]);
 
-    const [allDimoreData, percorso] = result;
+    const [allDimoreData, percorso, languages] = result;
     const allDimore = allDimoreData.map((data) => new Dimora(data));
     const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
 
     setIsLoading(false);
     setSearchableDimore(allDimore);
     setItinerarioDimore(itinerarioDimore);
-    setItinerarioName(percorso.descrizione);
+    // setNames(percorso.descrizione);
     setImage(percorso.imageUrl);
     setAllDimore(allDimore);
+    setLanguagesOptions(languages);
+    setLanguage(languages[0]);
   };
 
   const initAddPage = async (abortController: AbortController) => {
@@ -96,7 +112,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setIsLoading(false);
     setSearchableDimore(allDimore);
     setItinerarioDimore([]);
-    setItinerarioName("");
+    // setNames("");
     setAllDimore(allDimore);
   };
 
@@ -196,7 +212,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     );
   };
 
-  const canShowPage = !isLoading && itinerarioDimore;
+  const canShowPage = !isLoading && itinerarioDimore && languageOptions;
   return (
     <main className="ItinerarioDetails page">
       <div className="ItinerarioDetails__titleSection">
@@ -212,15 +228,33 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
           <div className="ItinerarioDetails__content">
             <div className="ItinerarioDetails__content__top">
               <div className="ItinerarioDetails__content__top__left">
-                <label className="label ItinerarioDetails__content__top__label">
-                  Nome
-                </label>
-                <input
+                <div className="ItinerarioDetails__content__top__left__section">
+                  <label className="label ItinerarioDetails__content__top__label">
+                    Nome
+                  </label>
+                  <Select
+                    options={languageOptions}
+                    value={language}
+                    onChange={setLanguage}
+                    getOptionLabel={(option) => option.nome}
+                    getOptionValue={(option) => option.id.toString()}
+                    isSearchable={false}
+                    unstyled
+                    classNames={{
+                      ...dropDownStyles,
+                      container: (state) =>
+                        "DimoraDetails__description__languageDropdown",
+                      control: (state) =>
+                        "btn DimoraDetails__description__languageDropdown__control",
+                    }}
+                  />
+                </div>
+                {/* <input
                   className="input"
                   type="text"
                   placeholder="Inserisci un nome"
-                  defaultValue={itinerarioName !== null ? itinerarioName : ""}
-                />
+                  defaultValue={names !== null ? names : ""}
+                /> */}
               </div>
               <div className="ItinerarioDetails__content__top__right">
                 <div className="label ItinerarioDetails__content__top__imagePicker">
