@@ -56,39 +56,71 @@ class Api {
   static async updateCredits(params: IUpdateCredits) {
     const res = await axios.post("/credits", {
       description: params.description,
+      signal: params.signal,
     });
 
     return res.data as ICreditsUpdateResponse;
   }
 
   static async fetchLanguages(params: IFetchLanguages) {
-    const res = await axios.get("/lingue");
+    const res = await axios.get("/lingue", {
+      signal: params.signal,
+    });
 
     return res.data as ILingua[];
   }
 
   static async fetchDimoreTypes(params: IFetchDimoraTypes) {
-    const res = await axios.get("/tipi-dimora");
+    const res = await axios.get("/dimore/tipi", {
+      signal: params.signal,
+    });
 
     return res.data as ITipoDimora[];
   }
 
   static async fetchFilters(params: IFetchFilters) {
-    const res = await axios.get("/filtri");
+    const res = await axios.get("/filtri", {
+      signal: params.signal,
+    });
 
     return res.data as IFiltro[];
   }
 
   static async fetchZone(params: IFetchZone) {
-    const res = await axios.get("/zone");
+    const res = await axios.get("/zone", {
+      signal: params.signal,
+    });
 
     return res.data as IIntroZona[];
   }
 
-  static async fetchDimoraTypes(params: IFetchDimoraTypes) {
-    const res = await axios.get("/tipi-dimora");
+  static async fetchAllIntroDimore(params: IFetchAllIntroDimore) {
+    const res = await axios.get("/dimore/intro", {
+      signal: params.signal,
+    });
 
-    return res.data as ITipoDimora[];
+    return res.data as IIntroDimora[];
+  }
+
+  static async addItinerario(params: IAddItinerario) {
+    const res = await axios.post("/percorso", params.data);
+
+    return res;
+  }
+
+  static async updateItinerario(params: IUpdateItinerario) {
+    const res = await axios.post("");
+
+    return res;
+  }
+
+  static async deleteItinerario(params: IDeleteItinerario) {
+    const res = await axios.delete("/percorso", {
+      params: { id: params.id },
+      signal: params.signal,
+    });
+
+    return res;
   }
 }
 

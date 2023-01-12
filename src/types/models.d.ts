@@ -19,6 +19,12 @@ interface IDimora {
   filtri: Filtro[];
 }
 
+interface IIntroDimora {
+  id: number;
+  nome: string;
+  imageUrl: string;
+}
+
 interface IFoto {
   id: number;
   path: string;

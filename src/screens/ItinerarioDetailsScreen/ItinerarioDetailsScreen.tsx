@@ -22,7 +22,11 @@ import classNames from "classnames";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import TextUtils from "../../utils/textUtils";
-import { abort } from "process";
+import { AxiosError } from "axios";
+import {
+  NotificationType,
+  useNotification,
+} from "../../store/notificationStore";
 
 export enum PageType {
   Add,
@@ -31,11 +35,6 @@ export enum PageType {
 
 interface IItinerarioDetailsScreenProps {
   pageType: PageType;
-}
-
-interface NameTranslation {
-  languageCode: string;
-  text: string;
 }
 
 function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
@@ -55,10 +54,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   );
   const [names, setNames] = useState<Map<string, string> | null>(null);
   const dialogState = useDialog();
+  const notificationState = useNotification();
   const [languageOptions, setLanguagesOptions] = useState<ILingua[] | null>(
     null
   );
   const [language, setLanguage] = useState<ILingua | null>(null);
+  const [isSaving, setSaving] = useState<boolean>(false);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -76,33 +77,40 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   }, [location, id]);
 
   const initEditPage = async (abortController: AbortController) => {
-    const itinerarioId = parseInt(id!, 10);
-    if (isNaN(itinerarioId))
-      return navigate("/app/itinerari/new", { replace: true });
+    try {
+      const itinerarioId = parseInt(id!, 10);
+      if (isNaN(itinerarioId))
+        return navigate("/app/itinerari/new", { replace: true });
 
-    setIsLoading(true);
-    const result = await Promise.all([
-      Api.fetchAllDimore({ signal: abortController.signal }),
-      Api.fetchPercorsoById({
-        signal: abortController.signal,
-        id: itinerarioId,
-      }),
-      Api.fetchLanguages({ signal: abortController.signal }),
-    ]);
+      setIsLoading(true);
+      const result = await Promise.all([
+        Api.fetchAllDimore({ signal: abortController.signal }),
+        Api.fetchPercorsoById({
+          signal: abortController.signal,
+          id: itinerarioId,
+        }),
+        Api.fetchLanguages({ signal: abortController.signal }),
+      ]);
 
-    const [allDimoreData, percorso, languages] = result;
-    const allDimore = allDimoreData.map((data) => new Dimora(data));
-    const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
+      const [allDimoreData, percorso, languages] = result;
+      const allDimore = allDimoreData.map((data) => new Dimora(data));
+      const itinerarioDimore = percorso.dimore.map((data) => new Dimora(data));
 
-    setIsLoading(false);
-    setSearchableDimore(allDimore);
-    setItinerarioDimore(itinerarioDimore);
-    setImage(percorso.imageUrl);
-    setAllDimore(allDimore);
-    setLanguagesOptions(languages);
-    setLanguage(languages[0]);
-    const names = TextUtils.getTranslations(percorso.descrizione);
-    setNames(names);
+      setIsLoading(false);
+      setSearchableDimore(allDimore);
+      setItinerarioDimore(itinerarioDimore);
+      setImage(percorso.imageUrl);
+      setAllDimore(allDimore);
+      setLanguagesOptions(languages);
+      setLanguage(languages[0]);
+      const names = TextUtils.getTranslations(percorso.descrizione);
+      setNames(names);
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.status === 404) {
+        navigate("/app/itinerari/new", { replace: true });
+      }
+    }
   };
 
   const initAddPage = async (abortController: AbortController) => {
@@ -123,13 +131,14 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setLanguage(languages[0]);
   };
 
-  const showAlertDialog = () => {
+  const showDeleteAlertDialog = () => {
     dialogState.setDialog({
       title: "Sei sicuro di voler eliminare l'itinerario?",
       subTitle: "Una volta cancellato non potrà essere recuperato",
       mainActionTitle: "Annulla",
       sideActionTitle: "Conferma",
       onMainActionClick: dialogState.dismissDialog,
+      onSideActionClick: deleteItinerario,
     });
     dialogState.showDialog();
   };
@@ -219,21 +228,6 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     );
   };
 
-  const saveItinerario = () => {
-    if (names == null || image == null) return;
-
-    const formData = new FormData();
-    // TODO: check if is correct
-    formData.set("languageCodes", JSON.stringify(names.keys()));
-    formData.set("descriptions", JSON.stringify(names.values()));
-    formData.set("timeInHours", JSON.stringify(0));
-    formData.set("image", image[0]);
-  };
-
-  const updateItinerario = () => {
-    const formData = new FormData();
-  };
-
   const getTranslatedName = () => {
     if (!language || !names) return "";
     const translation = names.get(language.codice);
@@ -248,7 +242,70 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setNames(newNames);
   };
 
+  const saveItinerario = async () => {
+    if (names == null || image == null) return;
+
+    let dimoreIds: number[] = [];
+    if (itinerarioDimore) {
+      dimoreIds = itinerarioDimore.map((dimora) => dimora.id);
+    }
+
+    const formData = new FormData();
+    formData.set("languageCodes", JSON.stringify([...names.keys()]));
+    formData.set("descriptions", JSON.stringify([...names.values()]));
+    formData.set("timeInHours", JSON.stringify(0));
+    formData.set("dimoreIds", JSON.stringify(dimoreIds));
+    formData.set("image", image[0]);
+
+    try {
+      setSaving(true);
+      const response = await Api.addItinerario({ data: formData });
+      notificationState.showNotification(
+        response.data.message,
+        NotificationType.Success
+      );
+      setSaving(false);
+      navigate(`/app/itinerari/${response.data["id"]}`, { replace: true });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+      setSaving(false);
+    }
+  };
+
+  const updateItinerario = () => {
+    const formData = new FormData();
+  };
+
+  const deleteItinerario = async () => {
+    if (!id) return;
+
+    try {
+      const response = await Api.deleteItinerario({ id: +id });
+      dialogState.dismissDialog();
+      notificationState.showNotification(
+        response.data.message,
+        NotificationType.Success
+      );
+      navigate("/app/itinerari", { replace: true });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.data) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+    }
+  };
+
   const canShowPage = !isLoading && itinerarioDimore && languageOptions;
+  const canSave = names && image && itinerarioDimore?.length;
   return (
     <main className="ItinerarioDetails page">
       <div className="ItinerarioDetails__titleSection">
@@ -388,18 +445,29 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
             {props.pageType === PageType.Edit && (
               <button
                 className="btn ItinerarioDetails__actions__delete"
-                onClick={showAlertDialog}
+                onClick={showDeleteAlertDialog}
               >
                 <DeleteSvg className="btn__icon" />
                 <span>Elimina</span>
               </button>
             )}
             <button
-              className="btn ItinerarioDetails__actions__save"
-              onClick={saveItinerario}
+              className={classNames(
+                "btn ItinerarioDetails__actions__save",
+                !canSave && "btn--disabled"
+              )}
+              onClick={canSave ? saveItinerario : () => {}}
             >
-              <CheckSvg className="btn__icon" />
-              <span>Salva</span>
+              {isSaving ? (
+                <div className="centeredContent">
+                  <Spinner className="spinner--sm spinner--white" />
+                </div>
+              ) : (
+                <>
+                  <CheckSvg className="btn__icon" />
+                  <p>Salva</p>
+                </>
+              )}
             </button>
           </div>
         </>

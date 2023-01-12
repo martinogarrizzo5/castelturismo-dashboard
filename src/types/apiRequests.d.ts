@@ -36,3 +36,17 @@ interface IFetchDimoraTypes extends IRequest {}
 interface IFetchZone extends IRequest {}
 
 interface IFetchFilters extends IRequest {}
+
+interface IFetchAllIntroDimore extends IRequest {}
+
+interface IAddItinerario extends IRequest {
+  data: FormData;
+}
+
+interface IUpdateItinerario extends IRequest {
+  data: FormData;
+}
+
+interface IDeleteItinerario extends IRequest {
+  id: number;
+}
