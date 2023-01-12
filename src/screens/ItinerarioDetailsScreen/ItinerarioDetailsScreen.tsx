@@ -22,6 +22,7 @@ import classNames from "classnames";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import TextUtils from "../../utils/textUtils";
+import { abort } from "process";
 
 export enum PageType {
   Add,
@@ -106,15 +107,20 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
 
   const initAddPage = async (abortController: AbortController) => {
     setIsLoading(true);
-    const allDimoreData = await Api.fetchAllDimore({
-      signal: abortController.signal,
-    });
+    const [allDimoreData, languages] = await Promise.all([
+      Api.fetchAllDimore({
+        signal: abortController.signal,
+      }),
+      Api.fetchLanguages({ signal: abortController.signal }),
+    ]);
     const allDimore = allDimoreData.map((data) => new Dimora(data));
     setIsLoading(false);
     setSearchableDimore(allDimore);
     setItinerarioDimore([]);
-    // setNames("");
+    setNames(new Map());
     setAllDimore(allDimore);
+    setLanguagesOptions(languages);
+    setLanguage(languages[0]);
   };
 
   const showAlertDialog = () => {
@@ -211,6 +217,21 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
         <h3 className="subTitle">{title}</h3>
       </div>
     );
+  };
+
+  const saveItinerario = () => {
+    if (names == null || image == null) return;
+
+    const formData = new FormData();
+    // TODO: check if is correct
+    formData.set("languageCodes", JSON.stringify(names.keys()));
+    formData.set("descriptions", JSON.stringify(names.values()));
+    formData.set("timeInHours", JSON.stringify(0));
+    formData.set("image", image[0]);
+  };
+
+  const updateItinerario = () => {
+    const formData = new FormData();
   };
 
   const getTranslatedName = () => {
@@ -373,7 +394,10 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                 <span>Elimina</span>
               </button>
             )}
-            <button className="btn ItinerarioDetails__actions__save">
+            <button
+              className="btn ItinerarioDetails__actions__save"
+              onClick={saveItinerario}
+            >
               <CheckSvg className="btn__icon" />
               <span>Salva</span>
             </button>
