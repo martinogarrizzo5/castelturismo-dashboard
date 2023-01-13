@@ -43,10 +43,10 @@ interface IAddItinerario extends IRequest {
   data: FormData;
 }
 
-interface IUpdateItinerario extends IRequest {
-  data: FormData;
-}
-
 interface IDeleteItinerario extends IRequest {
   id: number;
+}
+
+interface IUpdateItinerario extends IRequest {
+  data: FormData;
 }

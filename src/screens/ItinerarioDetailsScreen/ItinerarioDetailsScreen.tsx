@@ -42,7 +42,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [image, setImage] = useState<string | FileList | null>();
+  const [image, setImage] = useState<string | FileList | null>(null);
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [allDimore, setAllDimore] = useState<Dimora[] | null>(null);
@@ -280,6 +280,21 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
 
   const updateItinerario = () => {
     const formData = new FormData();
+    if (names !== null) {
+      formData.set("languageCodes", JSON.stringify([...names.keys()]));
+      formData.set("descriptions", JSON.stringify([...names.values()]));
+    }
+    formData.set("timeInHours", JSON.stringify(0));
+
+    let dimoreIds: number[] = [];
+    if (itinerarioDimore) {
+      dimoreIds = itinerarioDimore.map((dimora) => dimora.id);
+    }
+    formData.set("dimoreIds", JSON.stringify(dimoreIds));
+
+    if (image !== null) {
+      formData.set("image", image[0]);
+    }
   };
 
   const deleteItinerario = async () => {

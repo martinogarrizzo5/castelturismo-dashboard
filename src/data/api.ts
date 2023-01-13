@@ -108,17 +108,17 @@ class Api {
     return res;
   }
 
-  static async updateItinerario(params: IUpdateItinerario) {
-    const res = await axios.post("");
-
-    return res;
-  }
-
   static async deleteItinerario(params: IDeleteItinerario) {
     const res = await axios.delete("/percorso", {
       params: { id: params.id },
       signal: params.signal,
     });
+
+    return res;
+  }
+
+  static async updateItinerario(params: IUpdateItinerario) {
+    const res = await axios.post("/percorso/update", params.data);
 
     return res;
   }
