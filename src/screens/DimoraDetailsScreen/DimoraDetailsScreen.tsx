@@ -13,6 +13,13 @@ import Api from "../../data/api";
 import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import { useDialog } from "../../store/dialogStore";
+import TextUtils from "../../utils/textUtils";
+import { AxiosError } from "axios";
+import {
+  NotificationType,
+  useNotification,
+} from "../../store/notificationStore";
+import { getImageAsFile } from "../../utils/fetchImage";
 
 export enum DimoraDetailsPageType {
   Add,
@@ -28,7 +35,9 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const navigate = useNavigate();
 
   const dialogState = useDialog();
+  const notificationState = useNotification();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSaving, setSaving] = useState<boolean>(false);
 
   const [filterOptions, setFilterOptions] = useState<IFiltro[] | null>(null);
   const [zoneOptions, setZoneOptions] = useState<IIntroZona[] | null>(null);
@@ -40,14 +49,21 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   );
 
   const [dimora, setDimora] = useState<Dimora | null>(null);
+  const [name, setName] = useState<string>("");
   const [typology, setTypology] = useState<ITipoDimora | null>(null);
   const [zone, setZone] = useState<IIntroZona | null>(null);
   const [filters, setFilters] = useState<IFiltro[]>([]);
   const [language, setLanguage] = useState<ILingua | null>(null);
+  const [descriptions, setDescriptions] = useState<Map<string, string> | null>(
+    null
+  );
 
+  const [urlImages, setUrlImages] = useState<IFoto[]>([]);
   const [images, setImages] = useState<File[]>([]);
-  const [coverImage, setCoverImage] = useState<File>();
-  const [backgroundImage, setBackgroundImage] = useState<File>();
+  const [coverImage, setCoverImage] = useState<File | String | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<File | String | null>(
+    null
+  );
 
   // fetch dimora details and all available settings like filters
   useEffect(() => {
@@ -83,6 +99,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     setTypologyOptions(dimoreTypes);
     setLanguageOptions(languages);
     setLanguage(languages[0]);
+    setDescriptions(new Map());
   };
 
   const initEditPage = async (abortController: AbortController) => {
@@ -113,6 +130,15 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     setTypologyOptions(dimoreTypes);
     setLanguageOptions(languages);
 
+    setCoverImage(dimora.coverPath);
+    setBackgroundImage(dimora.backgroundPath);
+    setUrlImages(dimora.generalPhotos);
+    setImages([]);
+
+    setName(dimora.nome);
+    const descriptions = TextUtils.getTranslations(dimora.descrizione);
+    setDescriptions(descriptions);
+
     const selectedType = dimoreTypes.find((el) => el.tipo === dimora.tipologia);
     const selectedZone = zones.find((el) => el.descrizione === dimora.zona);
 
@@ -140,6 +166,10 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     setImages((prevImages) => prevImages.filter((img, i) => i !== index));
   };
 
+  const handleUrlImageRemove = (index: number) => {
+    setUrlImages((prevImages) => prevImages.filter((img, i) => i !== index));
+  };
+
   const handleCoverImageChange = (newPhotos: FileList | null) => {
     if (!newPhotos) return;
     setCoverImage(newPhotos[0]);
@@ -150,11 +180,93 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     setBackgroundImage(newPhoto[0]);
   };
 
-  const handleDimoraSave = () => {
+  const getTranslatedDescription = () => {
+    if (!language || !descriptions) return "";
+    const translation = descriptions.get(language.codice);
+    if (!translation) return "";
+
+    return translation;
+  };
+
+  const onDescriptionsChange = (text: string) => {
+    const newDescriptions = new Map(descriptions);
+    newDescriptions.set(language!.codice, text);
+    setDescriptions(newDescriptions);
+  };
+
+  const addDimora = async () => {
+    if (!coverImage || !backgroundImage || !descriptions || !typology || !zone)
+      return;
+
     const formData = new FormData();
     images.forEach((photo) => {
-      formData.append("generalImages", photo);
+      formData.append("generalImages[]", photo);
     });
+    if (coverImage instanceof File) {
+      formData.set("coverImage", coverImage);
+    }
+    if (coverImage instanceof File) {
+      formData.set("backgroundImage", backgroundImage as File);
+    }
+
+    const filtersId = filters.map((filter) => filter.id);
+
+    formData.set("filterIds", JSON.stringify(filtersId));
+    formData.set("languageCodes", JSON.stringify([...descriptions.keys()]));
+    formData.set("name", name);
+    formData.set("typeId", JSON.stringify(typology.id));
+    formData.set("zonaId", JSON.stringify(zone.id));
+    formData.set("descriptions", JSON.stringify([...descriptions.values()]));
+
+    formData.forEach(function (value, key) {
+      console.log(key + ": " + value);
+    });
+
+    try {
+      setSaving(true);
+      const response = await Api.addDimora({ data: formData });
+      notificationState.showNotification(
+        response.data.message,
+        NotificationType.Success
+      );
+      setSaving(false);
+      navigate(`/app/dimore/${response.data["id"]}`, { replace: true });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.data) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+      setSaving(false);
+    }
+  };
+
+  const deleteDimora = async () => {
+    if (!dimora) return;
+
+    try {
+      setSaving(true);
+      const response = await Api.deleteDimora({ id: dimora.id });
+      notificationState.showNotification(
+        response.data.message,
+        NotificationType.Success
+      );
+      setSaving(false);
+      dialogState.dismissDialog();
+      navigate(`/app/dimore`, { replace: true });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.data) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+      dialogState.dismissDialog();
+      setSaving(false);
+    }
   };
 
   const showDeletionAlertDialog = () => {
@@ -164,6 +276,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       mainActionTitle: "Annulla",
       sideActionTitle: "Conferma",
       onMainActionClick: dialogState.dismissDialog,
+      onSideActionClick: deleteDimora,
     });
     dialogState.showDialog();
   };
@@ -197,7 +310,8 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 placeholder="Inserisci un nome"
                 className="input DimoraDetails__fields__field__input"
                 autoComplete="off"
-                defaultValue={dimora?.nome}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="DimoraDetails__fields__field">
@@ -283,6 +397,8 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
             <textarea
               className="textarea DimoraDetails__description__textarea"
               placeholder="Inserisci una descrizione"
+              value={getTranslatedDescription()}
+              onChange={(e) => onDescriptionsChange(e.target.value)}
             ></textarea>
           </div>
           <div className="DimoraDetails__images">
@@ -291,9 +407,16 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Copertina
               </label>
               <div className="DimoraDetails__images__cover__imageWrapper">
-                {coverImage && (
+                {coverImage instanceof File && (
                   <img
                     src={URL.createObjectURL(coverImage)}
+                    alt="cover"
+                    className="DimoraDetails__images__cover__image"
+                  />
+                )}
+                {typeof coverImage === "string" && (
+                  <img
+                    src={coverImage}
                     alt="cover"
                     className="DimoraDetails__images__cover__image"
                   />
@@ -309,9 +432,16 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 Sfondo Intro
               </label>
               <div className="DimoraDetails__images__background__imageWrapper">
-                {backgroundImage && (
+                {backgroundImage instanceof File && (
                   <img
                     src={URL.createObjectURL(backgroundImage)}
+                    alt="background"
+                    className="DimoraDetails__images__background__image"
+                  />
+                )}
+                {typeof backgroundImage === "string" && (
+                  <img
+                    src={backgroundImage}
                     alt="background"
                     className="DimoraDetails__images__background__image"
                   />
@@ -333,10 +463,29 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                   className="DimoraDetails__images__other__imagesWrapper__imagePicker"
                 />
                 <div className="DimoraDetails__images__other__imagesWrapper">
+                  {urlImages.map((image, index) => (
+                    <div
+                      className="DimoraDetails__images__other__imageContainer"
+                      key={`url-general-${image.path}`}
+                    >
+                      <img
+                        src={image.path}
+                        alt="general"
+                        className="DimoraDetails__images__other__imageContainer__image"
+                      />
+                      <button
+                        type="button"
+                        className="iconButton DimoraDetails__images__other__imageContainer__button"
+                        onClick={() => handleUrlImageRemove(index)}
+                      >
+                        <CloseSvg className="iconButton__icon DimoraDetails__images__other__imageContainer__button__icon" />
+                      </button>
+                    </div>
+                  ))}
                   {images.map((image, index) => (
                     <div
                       className="DimoraDetails__images__other__imageContainer"
-                      key={`general-${image.name}`}
+                      key={`uploaded-general-${image.name}`}
                     >
                       <img
                         src={URL.createObjectURL(image)}
@@ -366,7 +515,10 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 <span>Elimina</span>
               </button>
             )}
-            <button className="btn DimoraDetails__actions__save">
+            <button
+              className="btn DimoraDetails__actions__save"
+              onClick={addDimora}
+            >
               <CheckSvg className="btn__icon" />
               <span>Salva</span>
             </button>

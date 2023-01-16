@@ -59,7 +59,7 @@ class Api {
       signal: params.signal,
     });
 
-    return res.data as ICreditsUpdateResponse;
+    return res.data;
   }
 
   static async fetchLanguages(params: IFetchLanguages) {
@@ -103,7 +103,9 @@ class Api {
   }
 
   static async addItinerario(params: IAddItinerario) {
-    const res = await axios.post("/percorso", params.data);
+    const res = await axios.post("/percorso", params.data, {
+      signal: params.signal,
+    });
 
     return res;
   }
@@ -118,7 +120,34 @@ class Api {
   }
 
   static async updateItinerario(params: IUpdateItinerario) {
-    const res = await axios.post("/percorso/update", params.data);
+    const res = await axios.post("/percorso/update", params.data, {
+      signal: params.signal,
+    });
+
+    return res;
+  }
+
+  static async addDimora(params: IAddDimora) {
+    const res = await axios.post("/dimora", params.data, {
+      signal: params.signal,
+    });
+
+    return res;
+  }
+
+  static async updateDimora(params: IUpdateDimora) {
+    const res = await axios.post("/dimora/update", params.data, {
+      signal: params.signal,
+    });
+
+    return res;
+  }
+
+  static async deleteDimora(params: IDeleteDimora) {
+    const res = await axios.delete("/dimora", {
+      params: { id: params.id },
+      signal: params.signal,
+    });
 
     return res;
   }

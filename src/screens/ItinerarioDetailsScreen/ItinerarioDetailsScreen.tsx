@@ -53,6 +53,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     null
   );
   const [names, setNames] = useState<Map<string, string> | null>(null);
+
+  const [oldItinerarioDimore, setOldItinerarioDimore] = useState<
+    Dimora[] | null
+  >(null);
+  const [oldNames, setOldNames] = useState<Map<string, string> | null>(null);
+
   const dialogState = useDialog();
   const notificationState = useNotification();
   const [languageOptions, setLanguagesOptions] = useState<ILingua[] | null>(
@@ -105,6 +111,9 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
       setLanguage(languages[0]);
       const names = TextUtils.getTranslations(percorso.descrizione);
       setNames(names);
+
+      setOldNames(new Map(names));
+      setOldItinerarioDimore([...itinerarioDimore]);
     } catch (err) {
       const error = err as AxiosError;
       if (error.response?.status === 404) {
@@ -129,6 +138,9 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setAllDimore(allDimore);
     setLanguagesOptions(languages);
     setLanguage(languages[0]);
+
+    setOldNames(new Map());
+    setOldItinerarioDimore([]);
   };
 
   const showDeleteAlertDialog = () => {
@@ -242,7 +254,37 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     setNames(newNames);
   };
 
-  const saveItinerario = async () => {
+  const areNamesChanged = () => {
+    if (!oldNames || !names) return false;
+
+    for (const [key, value] of names) {
+      if (oldNames.get(key) === undefined) {
+        if (value !== "") return true;
+      } else if (oldNames.get(key) !== value) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const areItinerarioDimoreChanged = () => {
+    if (!oldItinerarioDimore || !itinerarioDimore) return false;
+    if (oldItinerarioDimore.length !== itinerarioDimore.length) return true;
+
+    let isChanged: boolean = false;
+    itinerarioDimore.forEach((dimora, index) => {
+      if (
+        oldItinerarioDimore.length > index &&
+        oldItinerarioDimore[index].id !== dimora.id
+      )
+        isChanged = true;
+    });
+
+    return isChanged;
+  };
+
+  const addItinerario = async () => {
     if (names == null || image == null) return;
 
     let dimoreIds: number[] = [];
@@ -278,9 +320,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     }
   };
 
-  const updateItinerario = () => {
+  const updateItinerario = async () => {
     const formData = new FormData();
-    if (names !== null) {
+    if (id) {
+      formData.set("id", JSON.stringify(id));
+    }
+    if (names) {
       formData.set("languageCodes", JSON.stringify([...names.keys()]));
       formData.set("descriptions", JSON.stringify([...names.values()]));
     }
@@ -292,8 +337,26 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     }
     formData.set("dimoreIds", JSON.stringify(dimoreIds));
 
-    if (image !== null) {
+    if (image) {
       formData.set("image", image[0]);
+    }
+    try {
+      setSaving(true);
+      const res = await Api.updateItinerario({ data: formData });
+      setSaving(false);
+      notificationState.showNotification(
+        res.data.message,
+        NotificationType.Success
+      );
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+      setSaving(false);
     }
   };
 
@@ -320,7 +383,23 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   };
 
   const canShowPage = !isLoading && itinerarioDimore && languageOptions;
-  const canSave = names && image && itinerarioDimore?.length;
+
+  const addCondition =
+    props.pageType === PageType.Add &&
+    areNamesChanged() &&
+    areItinerarioDimoreChanged();
+  const updateCondition =
+    props.pageType === PageType.Edit &&
+    (areNamesChanged() || areItinerarioDimoreChanged());
+
+  const canSave =
+    names &&
+    image &&
+    itinerarioDimore?.length &&
+    (addCondition || updateCondition);
+  const saveItinerarioAction =
+    props.pageType === PageType.Add ? addItinerario : updateItinerario;
+
   return (
     <main className="ItinerarioDetails page">
       <div className="ItinerarioDetails__titleSection">
@@ -471,7 +550,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
                 "btn ItinerarioDetails__actions__save",
                 !canSave && "btn--disabled"
               )}
-              onClick={canSave ? saveItinerario : () => {}}
+              onClick={canSave && !isSaving ? saveItinerarioAction : () => {}}
             >
               {isSaving ? (
                 <div className="centeredContent">

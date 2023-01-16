@@ -50,3 +50,15 @@ interface IDeleteItinerario extends IRequest {
 interface IUpdateItinerario extends IRequest {
   data: FormData;
 }
+
+interface IAddDimora extends IRequest {
+  data: FormData;
+}
+
+interface IUpdateDimora extends IRequest {
+  data: FormData;
+}
+
+interface IDeleteDimora extends IRequest {
+  id: number;
+}

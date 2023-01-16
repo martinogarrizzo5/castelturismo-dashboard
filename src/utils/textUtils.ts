@@ -33,12 +33,15 @@ class TextUtils {
 
   static getTranslations(text: string) {
     const translations = new Map<string, string>();
-    const allTexts = text.split("<");
+    let matchedTags = text.match(/<(\w+)>([\s\S]*?)<\/\1>/g);
+    if (!matchedTags) return translations;
 
-    for (let translation of allTexts) {
-      const languageCode = translation.split(">")[0];
-      const text = translation.substring(languageCode.length + 1);
-      translations.set(languageCode, text);
+    for (let tag of matchedTags) {
+      let match = tag.match(/<(\w+)>([\s\S]*?)<\/\1>/);
+
+      if (match) {
+        translations.set(match[1], match[2]);
+      }
     }
 
     return translations;
