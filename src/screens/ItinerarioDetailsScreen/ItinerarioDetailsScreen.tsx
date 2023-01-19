@@ -58,6 +58,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     Dimora[] | null
   >(null);
   const [oldNames, setOldNames] = useState<Map<string, string> | null>(null);
+  const [oldImage, setOldImage] = useState<string | FileList | null>(null);
 
   const dialogState = useDialog();
   const notificationState = useNotification();
@@ -114,6 +115,7 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
 
       setOldNames(new Map(names));
       setOldItinerarioDimore([...itinerarioDimore]);
+      setOldImage(percorso.imageUrl);
     } catch (err) {
       const error = err as AxiosError;
       if (error.response?.status === 404) {
@@ -284,6 +286,10 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
     return isChanged;
   };
 
+  const isImageChanged = () => {
+    return image !== oldImage;
+  };
+
   const addItinerario = async () => {
     if (names == null || image == null) return;
 
@@ -348,6 +354,11 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
         res.data.message,
         NotificationType.Success
       );
+
+      setOldNames(new Map(names));
+      if (itinerarioDimore) {
+        setOldItinerarioDimore([...itinerarioDimore]);
+      }
     } catch (err) {
       const error = err as AxiosError;
       if (error.response) {
@@ -387,10 +398,11 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
   const addCondition =
     props.pageType === PageType.Add &&
     areNamesChanged() &&
-    areItinerarioDimoreChanged();
+    areItinerarioDimoreChanged() &&
+    image !== null;
   const updateCondition =
     props.pageType === PageType.Edit &&
-    (areNamesChanged() || areItinerarioDimoreChanged());
+    (areNamesChanged() || areItinerarioDimoreChanged() || isImageChanged());
 
   const canSave =
     names &&

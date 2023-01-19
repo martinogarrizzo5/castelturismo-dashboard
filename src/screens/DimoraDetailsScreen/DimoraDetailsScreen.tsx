@@ -20,6 +20,7 @@ import {
   useNotification,
 } from "../../store/notificationStore";
 import { getImageAsFile } from "../../utils/fetchImage";
+import classNames from "classnames";
 
 export enum DimoraDetailsPageType {
   Add,
@@ -64,6 +65,23 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const [backgroundImage, setBackgroundImage] = useState<File | String | null>(
     null
   );
+
+  // states used to check if informations are changed and ready to be saved
+  const [oldName, setOldName] = useState<string>("");
+  const [oldTypology, setOldTypology] = useState<ITipoDimora | null>(null);
+  const [oldZone, setOldZone] = useState<IIntroZona | null>(null);
+  const [oldFilters, setOldFilters] = useState<IFiltro[]>([]);
+  const [oldDescriptions, setOldDescriptions] = useState<Map<
+    string,
+    string
+  > | null>(null);
+  const [oldUrlImages, setOldUrlImages] = useState<IFoto[]>([]);
+  const [oldCoverImage, setOldCoverImage] = useState<File | String | null>(
+    null
+  );
+  const [oldBackgroundImage, setOldBackgroundImage] = useState<
+    File | String | null
+  >(null);
 
   // fetch dimora details and all available settings like filters
   useEffect(() => {
@@ -131,25 +149,33 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     setLanguageOptions(languages);
 
     setCoverImage(dimora.coverPath);
+    setOldCoverImage(dimora.coverPath);
     setBackgroundImage(dimora.backgroundPath);
+    setOldBackgroundImage(dimora.backgroundPath);
     setUrlImages(dimora.generalPhotos);
+    setOldUrlImages([...dimora.generalPhotos]);
     setImages([]);
 
     setName(dimora.nome);
+    setOldName(dimora.nome);
     const descriptions = TextUtils.getTranslations(dimora.descrizione);
     setDescriptions(descriptions);
+    setOldDescriptions(new Map(descriptions));
 
     const selectedType = dimoreTypes.find((el) => el.tipo === dimora.tipologia);
     const selectedZone = zones.find((el) => el.descrizione === dimora.zona);
 
     if (selectedType) {
       setTypology(selectedType);
+      setOldTypology(selectedType);
     }
     if (selectedZone) {
       setZone(selectedZone);
+      setOldZone(selectedZone);
     }
     setLanguage(languages[0]);
     setFilters(dimora.filtri);
+    setOldFilters([...dimora.filtri]);
   };
 
   const handleImagesChange = (newPhotos: FileList | null) => {
@@ -281,12 +307,81 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     dialogState.showDialog();
   };
 
+  const areDescriptionsChanged = () => {
+    if (!oldDescriptions || !descriptions) return false;
+
+    for (const [key, value] of descriptions) {
+      if (oldDescriptions.get(key) === undefined) {
+        if (value !== "") return true;
+      } else if (oldDescriptions.get(key) !== value) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const areFiltersChanged = () => {
+    const filterIds = filters.map((filter) => filter.id);
+    const oldFilterIds = new Set(oldFilters.map((filter) => filter.id));
+    if (filterIds.length !== oldFilterIds.size) return false;
+
+    for (let id of filterIds) {
+      if (!oldFilterIds.has(id)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const areGeneralImagesChanged = () => {
+    const oldImageIds = new Set(oldUrlImages.map((img) => img.id));
+    const imageIds = urlImages.map((img) => img.id);
+
+    // case any old image was removed
+    if (oldImageIds.size !== imageIds.length) return true;
+    // case any image was uploaded
+    if (images.length) return true;
+
+    for (let id of imageIds) {
+      if (!oldImageIds.has(id)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const canShowScreen =
     !isLoading &&
     filterOptions &&
     TypologyOptions &&
     zoneOptions &&
     languageOptions;
+
+  const addCondition =
+    props.pageType === DimoraDetailsPageType.Add &&
+    name !== "" &&
+    descriptions &&
+    coverImage &&
+    backgroundImage &&
+    images &&
+    zone &&
+    typology;
+
+  const updateCondition =
+    props.pageType === DimoraDetailsPageType.Edit &&
+    (name !== oldName ||
+      zone !== oldZone ||
+      typology !== oldTypology ||
+      areDescriptionsChanged() ||
+      areFiltersChanged() ||
+      coverImage !== oldCoverImage ||
+      backgroundImage !== oldBackgroundImage ||
+      areGeneralImagesChanged());
+
+  const canSave = addCondition || updateCondition;
 
   return (
     <main className="page DimoraDetails">
@@ -516,11 +611,22 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
               </button>
             )}
             <button
-              className="btn DimoraDetails__actions__save"
-              onClick={addDimora}
+              className={classNames(
+                "btn DimoraDetails__actions__save",
+                !canSave && "btn--disabled"
+              )}
+              onClick={canSave && !isSaving ? addDimora : () => {}}
             >
-              <CheckSvg className="btn__icon" />
-              <span>Salva</span>
+              {isSaving ? (
+                <div className="centeredContent">
+                  <Spinner className="spinner--sm spinner--white" />
+                </div>
+              ) : (
+                <>
+                  <CheckSvg className="btn__icon" />
+                  <p>Salva</p>
+                </>
+              )}
             </button>
           </div>
         </>
