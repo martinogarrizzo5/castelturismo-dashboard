@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 import { ReactComponent as CheckSvg } from "../../assets/icons/check.svg";
 import { ReactComponent as DeleteSvg } from "../../assets/icons/delete.svg";
@@ -19,7 +19,6 @@ import {
   NotificationType,
   useNotification,
 } from "../../store/notificationStore";
-import { getImageAsFile } from "../../utils/fetchImage";
 import classNames from "classnames";
 
 export enum DimoraDetailsPageType {
@@ -34,6 +33,7 @@ interface IDimoraDetailsScreenProps {
 function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const dialogState = useDialog();
   const notificationState = useNotification();
@@ -98,7 +98,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       setIsLoading(false);
       abortController.abort();
     };
-  }, [id, navigate]);
+  }, [id, navigate, location]);
 
   const initAddPage = async (abortController: AbortController) => {
     setIsLoading(true);
@@ -279,10 +279,18 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   };
 
   const updateDimora = async () => {
-    if (!coverImage || !backgroundImage || !descriptions || !typology || !zone)
+    if (
+      !id ||
+      !coverImage ||
+      !backgroundImage ||
+      !descriptions ||
+      !typology ||
+      !zone
+    )
       return;
 
     const formData = new FormData();
+    formData.set("id", id);
 
     // update general props
     const filtersId = filters.map((filter) => filter.id);
@@ -293,6 +301,23 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
     formData.set("zonaId", JSON.stringify(zone.id));
     formData.set("descriptions", JSON.stringify([...descriptions.values()]));
 
+    const imagesToDelete = urlImagesToDelete.map((image) =>
+      image.path.split("/").at(-1)
+    );
+    formData.set("generalImagesToDelete", JSON.stringify(imagesToDelete));
+
+    images.forEach((photo) => {
+      formData.append("newGeneralImages[]", photo);
+    });
+
+    if (coverImage instanceof File) {
+      formData.set("newCoverImage", coverImage);
+    }
+
+    if (backgroundImage instanceof File) {
+      formData.set("newBackgroundImage", backgroundImage);
+    }
+
     try {
       setSaving(true);
       const response = await Api.updateDimora({ data: formData });
@@ -301,6 +326,25 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
         response.data.message,
         NotificationType.Success
       );
+
+      // disable save button
+      setOldBackgroundImage(backgroundImage);
+      setOldCoverImage(coverImage);
+      setOldFilters([...filters]);
+      setOldDescriptions(new Map(descriptions));
+      setOldName(name);
+      setOldTypology(typology);
+      setOldZone(zone);
+
+      // refetch the general images to get their new paths
+      setUrlImages([]);
+      setOldUrlImages([]);
+      setImages([]);
+      const newImages = await Api.getDimoraImages({ id: +id });
+      // we only need the images that are not cover or background
+      const newGeneralImages = newImages.filter((img) => img.copertina === 0);
+      setUrlImages(newGeneralImages);
+      setOldUrlImages(newGeneralImages);
     } catch (err) {
       const error = err as AxiosError;
       if (error.response?.data) {
@@ -368,7 +412,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   const areFiltersChanged = () => {
     const filterIds = filters.map((filter) => filter.id);
     const oldFilterIds = new Set(oldFilters.map((filter) => filter.id));
-    if (filterIds.length !== oldFilterIds.size) return false;
+    if (filterIds.length !== oldFilterIds.size) return true;
 
     for (let id of filterIds) {
       if (!oldFilterIds.has(id)) {
@@ -426,6 +470,8 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       areGeneralImagesChanged());
 
   const canSave = addCondition || updateCondition;
+  const saveDimoraAction =
+    props.pageType === DimoraDetailsPageType.Add ? addDimora : updateDimora;
 
   return (
     <main className="page DimoraDetails">
@@ -659,7 +705,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
                 "btn DimoraDetails__actions__save",
                 !canSave && "btn--disabled"
               )}
-              onClick={canSave && !isSaving ? addDimora : () => {}}
+              onClick={canSave && !isSaving ? saveDimoraAction : () => {}}
             >
               {isSaving ? (
                 <div className="centeredContent">

@@ -151,6 +151,15 @@ class Api {
 
     return res;
   }
+
+  static async getDimoraImages(params: IGetDimoraImages) {
+    const res = await axios.get("/dimora/images", {
+      params: { id: params.id },
+      signal: params.signal,
+    });
+
+    return res.data as IFoto[];
+  }
 }
 
 export default Api;

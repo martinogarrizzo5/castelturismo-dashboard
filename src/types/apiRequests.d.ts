@@ -62,3 +62,7 @@ interface IUpdateDimora extends IRequest {
 interface IDeleteDimora extends IRequest {
   id: number;
 }
+
+interface IGetDimoraImages extends IRequest {
+  id: number;
+}
