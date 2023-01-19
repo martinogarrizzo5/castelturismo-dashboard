@@ -27,6 +27,7 @@ import {
   NotificationType,
   useNotification,
 } from "../../store/notificationStore";
+import EmptyImg from "../../assets/images/empty.png";
 
 export enum PageType {
   Add,
@@ -236,7 +237,12 @@ function ItinerarioDetailsScreen(props: IItinerarioDetailsScreenProps) {
 
   const noItemAvailableDiv = (title: string) => {
     return (
-      <div className="centeredContent">
+      <div className="centeredContent ItinerarioDetails__empty">
+        <img
+          src={EmptyImg}
+          alt="empty list"
+          className="ItinerarioDetails__empty__img"
+        />
         <h3 className="subTitle">{title}</h3>
       </div>
     );
