@@ -60,6 +60,7 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   );
 
   const [urlImages, setUrlImages] = useState<IFoto[]>([]);
+  const [urlImagesToDelete, setUrlImagesToDelete] = useState<IFoto[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [coverImage, setCoverImage] = useState<File | String | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<File | String | null>(
@@ -193,6 +194,14 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
   };
 
   const handleUrlImageRemove = (index: number) => {
+    // keep a reference of the image to delete it on the server when saving
+    let imageToDelete = urlImagesToDelete.find(
+      (item) => item.id === urlImages[index].id
+    );
+    if (!imageToDelete) {
+      setUrlImagesToDelete((prevImages) => [...prevImages, urlImages[index]]);
+    }
+
     setUrlImages((prevImages) => prevImages.filter((img, i) => i !== index));
   };
 
@@ -257,6 +266,41 @@ function DimoraDetailsScreen(props: IDimoraDetailsScreenProps) {
       );
       setSaving(false);
       navigate(`/app/dimore/${response.data["id"]}`, { replace: true });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response?.data) {
+        notificationState.showNotification(
+          (error.response.data as any).error,
+          NotificationType.Error
+        );
+      }
+      setSaving(false);
+    }
+  };
+
+  const updateDimora = async () => {
+    if (!coverImage || !backgroundImage || !descriptions || !typology || !zone)
+      return;
+
+    const formData = new FormData();
+
+    // update general props
+    const filtersId = filters.map((filter) => filter.id);
+    formData.set("filterIds", JSON.stringify(filtersId));
+    formData.set("languageCodes", JSON.stringify([...descriptions.keys()]));
+    formData.set("name", name);
+    formData.set("typeId", JSON.stringify(typology.id));
+    formData.set("zonaId", JSON.stringify(zone.id));
+    formData.set("descriptions", JSON.stringify([...descriptions.values()]));
+
+    try {
+      setSaving(true);
+      const response = await Api.updateDimora({ data: formData });
+      setSaving(false);
+      notificationState.showNotification(
+        response.data.message,
+        NotificationType.Success
+      );
     } catch (err) {
       const error = err as AxiosError;
       if (error.response?.data) {
