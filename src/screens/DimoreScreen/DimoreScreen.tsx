@@ -100,7 +100,7 @@ function DimoreScreen() {
     navigate("/app/dimore/new");
   };
 
-  const createDimoreSection = (tipology: string, dimore: Dimora[]) => {
+  const createDimoreSection = (tipology: string, dimore: IIntroDimora[]) => {
     return (
       <div className="Dimore__section">
         <h2 className="Dimore__section__title">{tipology}</h2>
