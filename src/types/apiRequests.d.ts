@@ -17,6 +17,11 @@ interface IFetchDimoreByZona extends IRequest {
   id: number;
 }
 
+interface IFetchIntroDimore extends IRequest {
+  name?: string | null;
+  zonaId?: number | null;
+}
+
 interface IFetchIntroPercorsi extends IRequest {}
 
 interface IFetchPercorsoById extends IRequest {
@@ -36,8 +41,6 @@ interface IFetchDimoraTypes extends IRequest {}
 interface IFetchZone extends IRequest {}
 
 interface IFetchFilters extends IRequest {}
-
-interface IFetchAllIntroDimore extends IRequest {}
 
 interface IAddItinerario extends IRequest {
   data: FormData;

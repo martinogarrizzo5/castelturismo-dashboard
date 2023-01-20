@@ -3,7 +3,7 @@ import Dimora from "../../data/models/dimora";
 import "./DimoraCard.scss";
 
 interface IDimoraCardProps {
-  dimora: Dimora;
+  dimora: IIntroDimora;
   onClick: () => void;
 }
 
@@ -18,11 +18,7 @@ function DimoraCard(props: IDimoraCardProps) {
     return name.substring(0, shortNameSize) + "...";
   };
 
-  let imageToShow = props.dimora.coverPath;
-  // TODO: remove this when there will be better images for hotels and bars
-  if (props.dimora.tipologia === "Bar") {
-    imageToShow = props.dimora.foto[1].path;
-  }
+  let imageToShow = props.dimora.imageUrl;
 
   return (
     <figure className="DimoraCard" onClick={props.onClick}>

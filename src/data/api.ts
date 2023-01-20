@@ -6,6 +6,15 @@ class Api {
     return res.data as IDimora[];
   }
 
+  static async fetchIntroDimore(params: IFetchIntroDimore) {
+    const res = await axios.get("/dimore", {
+      signal: params.signal,
+      params: { search: params.name, zonaId: params.zonaId, light: true },
+    });
+
+    return res.data as IIntroDimora[];
+  }
+
   static async fetchDimoraById(params: IFetchDimoraById) {
     const res = await axios.get(`/dimora`, {
       signal: params.signal,
@@ -92,14 +101,6 @@ class Api {
     });
 
     return res.data as IIntroZona[];
-  }
-
-  static async fetchAllIntroDimore(params: IFetchAllIntroDimore) {
-    const res = await axios.get("/dimore/intro", {
-      signal: params.signal,
-    });
-
-    return res.data as IIntroDimora[];
   }
 
   static async addItinerario(params: IAddItinerario) {

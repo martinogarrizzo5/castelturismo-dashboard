@@ -6,7 +6,6 @@ import "./DimoreScreen.scss";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import Api from "../../data/api";
 import DimoraCard from "../../components/DimoraCard/DimoraCard";
-import Dimora from "../../data/models/dimora";
 import Spinner from "../../components/Spinner/Spinner";
 import classNames from "classnames";
 
@@ -15,7 +14,7 @@ function DimoreScreen() {
   const [params, setSearchParams] = useSearchParams();
 
   const [searchedDimora, setSearchedDimora] = useState<string>("");
-  const [dimore, setDimore] = useState<Dimora[] | null>(null);
+  const [dimore, setDimore] = useState<IIntroDimora[] | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false);
 
   const zones = [
@@ -30,23 +29,16 @@ function DimoreScreen() {
     const abortController = new AbortController();
     const zonaId = params.get("zona") || "";
 
-    if (zonaId) {
-      Api.searchDimore({
-        zonaId: +zonaId,
-        name: searchedDimora,
-        signal: abortController.signal,
-      })
-        .then((dimore) => handleDimoreData(dimore))
-        .catch((err) => handleRequestError(err));
-    } else {
-      Api.fetchAllDimore({ signal: abortController.signal })
-        .then((dimoreData) => handleDimoreData(dimoreData))
-        .catch((err) => handleRequestError(err));
-    }
+    Api.fetchIntroDimore({
+      zonaId: +zonaId,
+      name: searchedDimora,
+      signal: abortController.signal,
+    })
+      .then((dimore) => handleDimoreData(dimore))
+      .catch((err) => handleRequestError(err));
 
-    const handleDimoreData = (dimoreData: IDimora[]) => {
-      const dimore = dimoreData.map((data) => new Dimora(data));
-      setDimore(dimore);
+    const handleDimoreData = (dimoreData: IIntroDimora[]) => {
+      setDimore(dimoreData);
       setIsLoadingContent(false);
     };
 
@@ -70,25 +62,23 @@ function DimoreScreen() {
   const onSearch = async () => {
     setIsLoadingContent(true);
     const zonaId = params.get("zona");
-    const dimoreData = await Api.searchDimore({
+    const dimoreData = await Api.fetchIntroDimore({
       name: searchedDimora,
       zonaId: zonaId ? +zonaId : null,
     });
     setIsLoadingContent(false);
-    const dimore = dimoreData.map((data) => new Dimora(data));
-    setDimore(dimore);
+    setDimore(dimoreData);
   };
 
   const onDeleteSearch = async () => {
     const zonaId = params.get("zona");
     setIsLoadingContent(true);
-    const dimoreData = await Api.searchDimore({
+    const dimoreData = await Api.fetchIntroDimore({
       name: "",
       zonaId: zonaId ? +zonaId : null,
     });
     setIsLoadingContent(false);
-    const dimore = dimoreData.map((data) => new Dimora(data));
-    setDimore(dimore);
+    setDimore(dimoreData);
   };
 
   const filterByZona = (id: number) => {
@@ -101,7 +91,7 @@ function DimoreScreen() {
     setSearchParams({});
   };
 
-  const onCardClick = (dimora: Dimora) => {
+  const onCardClick = (dimora: IIntroDimora) => {
     navigate(`/app/dimore/${dimora.id}`);
   };
 
