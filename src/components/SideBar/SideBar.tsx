@@ -40,7 +40,7 @@ function SideBar() {
         <SideBarLink icon={BuildingSvg} to="/app/dimore" />
         <SideBarLink icon={ClockSvg} to="/app/itinerari" />
         <SideBarLink icon={InfoSvg} to="/app/credits" />
-        <SideBarLink icon={SettingsSvg} to="/app/settings" />
+        {/* <SideBarLink icon={SettingsSvg} to="/app/settings" /> */}
         <div className="SideBar__links__logout">
           <SideBarButton icon={LogoutSvg} onClick={onLogout} />
         </div>
