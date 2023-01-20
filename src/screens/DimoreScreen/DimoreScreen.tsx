@@ -13,6 +13,7 @@ import classNames from "classnames";
 function DimoreScreen() {
   const navigate = useNavigate();
   const [params, setSearchParams] = useSearchParams();
+  const zonaId = params.get("zona");
 
   const [searchedDimora, setSearchedDimora] = useState<string>("");
   const [dimore, setDimore] = useState<Dimora[] | null>(null);
@@ -109,7 +110,22 @@ function DimoreScreen() {
     navigate("/app/dimore/new");
   };
 
-  const zonaId = params.get("zona");
+  const createDimoreSection = (tipology: string, dimore: Dimora[]) => {
+    return (
+      <div className="Dimore__section">
+        <h2 className="Dimore__section__title">{tipology}</h2>
+        <div className="Dimore__section__dimore">
+          {dimore.map((dimora) => (
+            <DimoraCard
+              dimora={dimora}
+              key={`dimora-${dimora.id}`}
+              onClick={() => onCardClick(dimora)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <main className="Dimore page">
