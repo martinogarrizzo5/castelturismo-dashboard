@@ -8,6 +8,6 @@ Written with React, Typescript and Sass, this website is used by the proloco of 
 
 ![home preview](./src/assets/previews/preview1.png)
 
-### Path Edit Page
+### Path Edit Page Preview
 
 ![itinerario edit preview](./src/assets/previews/preview2.png)
