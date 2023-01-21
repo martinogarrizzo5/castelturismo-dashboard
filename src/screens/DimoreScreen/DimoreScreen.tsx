@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ReactComponent as PinSvg } from "../../assets/icons/pin.svg";
 import { ReactComponent as AddSvg } from "../../assets/icons/add.svg";
 import "./DimoreScreen.scss";
