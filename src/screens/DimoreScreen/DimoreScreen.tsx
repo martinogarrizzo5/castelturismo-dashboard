@@ -103,7 +103,9 @@ function DimoreScreen() {
   const createDimoreSection = (tipology: string, dimore: IIntroDimora[]) => {
     return (
       <div className="Dimore__section">
-        <h2 className="Dimore__section__title">{tipology}</h2>
+        <h2 className="Dimore__section__title">
+          <span>{tipology}</span>
+        </h2>
         <div className="Dimore__section__dimore">
           {dimore.map((dimora) => (
             <DimoraCard
@@ -119,7 +121,25 @@ function DimoreScreen() {
 
   return (
     <main className="Dimore page">
-      <h2 className="Dimore__title title">Zone</h2>
+      <h1 className="Dimore__title title">Dimore</h1>
+
+      <div className="Dimore__actions">
+        <SearchBar
+          value={searchedDimora}
+          onChange={onSearchedValueChanged}
+          onSearch={onSearch}
+          onDeleteSearch={onDeleteSearch}
+        />
+        <button
+          className="btn Dimore__add-button"
+          type="button"
+          onClick={onAddButtonClick}
+        >
+          <AddSvg className="Dimore__add-button__icon" />
+          <span>Aggiungi</span>
+        </button>
+      </div>
+
       <div className="Dimore__zones">
         <button
           className={classNames(
@@ -147,33 +167,9 @@ function DimoreScreen() {
           </button>
         ))}
       </div>
-      <h1 className="Dimore__title title">Dimore</h1>
-      <div className="Dimore__actions">
-        <SearchBar
-          value={searchedDimora}
-          onChange={onSearchedValueChanged}
-          onSearch={onSearch}
-          onDeleteSearch={onDeleteSearch}
-        />
-        <button
-          className="btn Dimore__add-button"
-          type="button"
-          onClick={onAddButtonClick}
-        >
-          <AddSvg className="Dimore__add-button__icon" />
-          <span>Aggiungi</span>
-        </button>
-      </div>
+
       {dimore !== null && !isLoadingContent ? (
-        <div className="Dimore__dimore">
-          {dimore.map((dimora) => (
-            <DimoraCard
-              dimora={dimora}
-              key={`dimora-${dimora.id}`}
-              onClick={() => onCardClick(dimora)}
-            />
-          ))}
-        </div>
+        createDimoreSection("Palazzi", dimore)
       ) : (
         <div className="centeredContent Dimore__dimore__spinner">
           <Spinner />
